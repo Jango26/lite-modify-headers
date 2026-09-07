@@ -1,0 +1,35 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens carried over from the pre-React stylesheet, exposed to
+ * Tailwind so they are usable as utilities (bg-blue, text-muted, ...).
+ *
+ * The accent is monochrome : the "blue" names are kept so components do not
+ * have to be touched, but they hold near black values. Running green and error
+ * red stay coloured, they carry a state meaning rather than the brand.
+ */
+@theme {
+    --color-blue: #111827;
+    --color-blue-hover: #374151;
+    --color-blue-soft: #f0f1f3;
+    --color-blue-ink: #4b5563;
+    --color-border: #e5e7eb;
+    --color-ink: #111827;
+    --color-muted: #6b7280;
+    --color-surface: #f6f7f9;
+    --color-surface-hover: #eef0f3;
+    --color-faint: #b6bcc6;
+    --color-fainter: #c4c9d1;
+    --color-running: #16a34a;
+    --color-running-soft: #e7f6ec;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/*
+ * Content is capped at 1160px and centered, falling back to a 40px margin on
+ * narrow screens. Applied as padding rather than a wrapper so that full width
+ * bands (the status bar) keep their background edge to edge.
+ */
+@utility gutter {
+    padding-inline: max(40px, calc((100% - 1160px) / 2));
+}

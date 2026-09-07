@@ -1,0 +1,28 @@
+{
+    "description": "Rewrite HTTP request and response headers from a local rules table",
+    "manifest_version": 3,
+    "name": "Lite Modify Headers",
+    "version": "1.0.0",
+    "homepage_url": "https://github.com/Jango26/lite-modify-headers",
+    "icons": {
+        "16": "icons/m-16.png",
+        "32": "icons/m-32.png",
+        "48": "icons/m-48.png",
+        "128": "icons/m-128.png"
+    },
+    "permissions": ["activeTab", "tabs", "storage", "declarativeNetRequest", "declarativeNetRequestWithHostAccess"],
+    "host_permissions": ["*://*/*"],
+    "action": {
+        "default_icon": "icons/m-32.png",
+        "default_title": "Lite Modify Headers",
+        "default_popup": "src/menu/index.html"
+    },
+    "background": {
+        "service_worker": "src/service-worker.ts",
+        "type": "module"
+    },
+    "options_ui": {
+        "page": "src/config/index.html",
+        "open_in_tab": true
+    }
+}
