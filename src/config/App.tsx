@@ -93,13 +93,13 @@ export function App() {
                 <button
                     type="button"
                     onClick={addRule}
-                    className="flex-none cursor-pointer rounded-md border-none bg-blue px-[22px] py-3 text-sm font-semibold text-white hover:bg-blue-hover">
+                    className="flex-none cursor-pointer rounded-md border-none bg-accent px-[22px] py-3 text-sm font-semibold text-white hover:bg-accent-hover">
                     + Add rule
                 </button>
                 <button
                     type="button"
                     onClick={addGroup}
-                    className="flex-none cursor-pointer rounded-md border border-blue bg-white px-[22px] py-3 text-sm font-semibold text-blue hover:bg-blue-soft">
+                    className="flex-none cursor-pointer rounded-md border border-accent bg-white px-[22px] py-3 text-sm font-semibold text-accent hover:bg-accent-soft">
                     + Add group
                 </button>
                 <p className="m-0 leading-relaxed text-muted">

@@ -11,7 +11,7 @@ import {useEffect, useRef, useState} from 'react';
  * Tailwind resolves that collision by stylesheet order, not by class order.
  */
 export const FIELD =
-    'h-9 min-w-0 rounded-md border border-border bg-white px-2.5 text-[13px] focus:border-blue focus:outline-none';
+    'h-9 min-w-0 rounded-md border border-border bg-white px-2.5 text-[13px] focus:border-accent focus:outline-none';
 export const INPUT = `${FIELD} font-mono placeholder:text-faint disabled:bg-surface disabled:text-faint`;
 export const ICON_BTN =
     'cursor-pointer border-none bg-transparent p-0 text-[11px] leading-none text-fainter hover:text-muted disabled:cursor-default disabled:text-[#eceef1]';

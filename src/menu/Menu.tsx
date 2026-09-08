@@ -67,7 +67,7 @@ export function Menu() {
                 <button
                     type="button"
                     onClick={openConfigTab}
-                    className="cursor-pointer border-none bg-transparent p-0 text-[13px] font-semibold text-blue hover:underline">
+                    className="cursor-pointer border-none bg-transparent p-0 text-[13px] font-semibold text-accent hover:underline">
                     Open rule editor
                 </button>
                 <GithubLink size={17} />
@@ -137,7 +137,7 @@ function ItemLine({item, onToggle}: {item: ConfigItem; onToggle: () => void}) {
                 <span className="block truncate font-mono text-[13px] font-bold text-ink">{itemLabel(item)}</span>
                 <span className="mt-0.5 block truncate text-xs text-muted">{itemDetail(item)}</span>
             </span>
-            <span className="flex-none rounded bg-blue-soft px-2 py-1 font-mono text-[11px] font-semibold text-blue-ink">
+            <span className="flex-none rounded bg-accent-soft px-2 py-1 font-mono text-[11px] font-semibold text-accent-ink">
                 {itemTag(item)}
             </span>
         </li>
@@ -162,7 +162,7 @@ function Toggle({checked, title, onChange, large}: ToggleProps) {
             title={title}
             checked={checked}
             onChange={onChange}
-            className={`relative m-0 flex-none cursor-pointer appearance-none rounded-full bg-border shadow-[inset_0_0_0_1px_#d5d8dd] transition-colors after:absolute after:top-0.5 after:left-0.5 after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-blue checked:shadow-none ${size}`}
+            className={`relative m-0 flex-none cursor-pointer appearance-none rounded-full bg-border shadow-[inset_0_0_0_1px_#d5d8dd] transition-colors after:absolute after:top-0.5 after:left-0.5 after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-accent checked:shadow-none ${size}`}
         />
     );
 }

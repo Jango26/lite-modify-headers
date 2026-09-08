@@ -2,17 +2,20 @@
 
 /*
  * Design tokens carried over from the pre-React stylesheet, exposed to
- * Tailwind so they are usable as utilities (bg-blue, text-muted, ...).
+ * Tailwind so they are usable as utilities (bg-accent, text-muted, ...).
  *
- * The accent is monochrome : the "blue" names are kept so components do not
- * have to be touched, but they hold near black values. Running green and error
- * red stay coloured, they carry a state meaning rather than the brand.
+ * The accent is green (#34a853). It doubles as the running colour : the icon
+ * already turns green while rules are applied, so brand and "it is live" are
+ * the same signal. Only the error red carries a different meaning.
+ *
+ * accent-ink is a darker shade, used for text on accent-soft and for small
+ * green labels where the accent itself would not have enough contrast.
  */
 @theme {
-    --color-blue: #111827;
-    --color-blue-hover: #374151;
-    --color-blue-soft: #f0f1f3;
-    --color-blue-ink: #4b5563;
+    --color-accent: #34a853;
+    --color-accent-hover: #2b8c45;
+    --color-accent-soft: #eaf6ee;
+    --color-accent-ink: #1e7a3c;
     --color-border: #e5e7eb;
     --color-ink: #111827;
     --color-muted: #6b7280;
@@ -20,8 +23,8 @@
     --color-surface-hover: #eef0f3;
     --color-faint: #b6bcc6;
     --color-fainter: #c4c9d1;
-    --color-running: #16a34a;
-    --color-running-soft: #e7f6ec;
+    --color-running: #34a853;
+    --color-running-soft: #eaf6ee;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 

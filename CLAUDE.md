@@ -64,6 +64,8 @@ Chromium（Chrome / Edge）浏览器扩展，Manifest V3，根据规则表改写
 
 ## 样式
 
-Tailwind v4，无 `tailwind.config.js`——设计变量写在 `src/index.css` 的 `@theme` 块里（`--color-blue`、`--color-muted` 等），用起来就是 `bg-blue` / `text-muted`。
+Tailwind v4，无 `tailwind.config.js`——设计变量写在 `src/index.css` 的 `@theme` 块里（`--color-accent`、`--color-muted` 等），用起来就是 `bg-accent` / `text-muted`。
+
+主题色是绿色 `#34a853`，`--color-accent` 和 `--color-running` 用的是同一个值：图标本来就在规则生效时变绿，所以「品牌色」和「正在运行」故意是同一个信号。`scripts/make-icons.mjs` 里的 `STATES.green` 也是这个值，改的时候两处一起改。
 
 内容区宽度锁在 1160px 居中，靠自定义 `@utility gutter`（`padding-inline: max(40px, calc((100% - 1160px) / 2))`）。用 padding 而不是包一层容器，是为了让状态栏这种通栏色块的背景能铺满整个宽度。
