@@ -125,12 +125,51 @@ export function createEmptyGroup(): GroupItem {
     return {kind: 'group', id: newId(), status: 'on', name: '', url_filter: '', headers: [createEmptyGroupHeader()]};
 }
 
+/*
+ * What a brand new installation starts with : one rule and one group, filled
+ * in so the table shows what the columns are for instead of a blank line.
+ *
+ * Both are off. The user has not written these, so pressing Start must not
+ * suddenly rewrite their traffic — the switch is the invitation to try them.
+ * This is only used on first install. A user who deletes every line gets an
+ * empty rule back, not the samples again.
+ */
 export function getDefaultConfig(): Config {
     return {
         format_version: CONFIG_FORMAT_VERSION,
         debug_mode: false,
-        items: [createEmptyRuleItem()]
+        items: [createSampleRule(), createSampleGroup()]
     };
+}
+
+function createSampleRule(): RuleItem {
+    return {
+        kind: 'rule',
+        id: newId(),
+        status: 'off',
+        name: 'Example : tag requests with a debug header',
+        apply_on: 'req',
+        action: 'set',
+        header_name: 'X-Debug-Mode',
+        header_value: '1',
+        url_filter: 'example.com'
+    };
+}
+
+/* A group is the answer to "same URL, several headers", so the sample is one. */
+function createSampleGroup(): GroupItem {
+    return {
+        kind: 'group',
+        id: newId(),
+        status: 'off',
+        name: 'Example : open up CORS on a local server',
+        url_filter: 'localhost',
+        headers: [sampleHeader('Access-Control-Allow-Origin', '*'), sampleHeader('Access-Control-Allow-Headers', '*')]
+    };
+}
+
+function sampleHeader(header_name: string, header_value: string): GroupHeader {
+    return {id: newId(), status: 'on', apply_on: 'res', action: 'set', header_name, header_value};
 }
 
 /*

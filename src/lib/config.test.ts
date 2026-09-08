@@ -208,6 +208,26 @@ describe('Config migration', () => {
     });
 });
 
+describe('First install samples', () => {
+    it('ships one filled in rule and one filled in group', () => {
+        const items = getDefaultConfig().items;
+        expect(items.map((item) => item.kind)).toEqual(['rule', 'group']);
+        expect(items.every((item) => item.name.length > 0)).toBe(true);
+    });
+
+    /* The user did not write these, so Start must not act on them. */
+    it('leaves the samples switched off', () => {
+        expect(getDefaultConfig().items.every((item) => item.status === 'off')).toBe(true);
+        expect(convertItemsToDynamicRules(getDefaultConfig().items)).toEqual([]);
+    });
+
+    /* Emptying the table is a deliberate act : do not hand the samples back. */
+    it('does not reappear once every line has been deleted', () => {
+        const emptied = migrateConfig({format_version: '3.0', items: []});
+        expect(withoutIds(emptied.items)).toEqual(withoutIds([createEmptyRuleItem()]));
+    });
+});
+
 describe('Groups', () => {
     function header(overrides: Partial<GroupHeader> = {}): GroupHeader {
         return {...createEmptyGroupHeader(), header_name: 'x-group', ...overrides};
