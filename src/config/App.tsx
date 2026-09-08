@@ -35,14 +35,14 @@ function UrlFilterHint() {
             <span className="flex size-[15px] cursor-help items-center justify-center rounded-full bg-border text-[10px] font-bold text-muted">
                 ?
             </span>
-            <span className="pointer-events-none absolute top-[22px] left-0 z-10 hidden w-[330px] rounded-lg bg-ink p-3 text-left font-normal tracking-normal shadow-[0_4px_16px_rgba(0,0,0,0.2)] group-hover:block">
+            <span className="pointer-events-none absolute top-[22px] left-0 z-10 hidden w-[330px] rounded-lg bg-tip p-3 text-left font-normal tracking-normal shadow-[0_4px_16px_rgba(0,0,0,0.2)] group-hover:block">
                 {URL_FILTER_HINT.map(([syntax, meaning]) => (
                     <span key={syntax} className="mb-1.5 block last:mb-0">
-                        <code className="font-mono text-[11px] text-white">{syntax}</code>
-                        <span className="ml-1.5 text-[11px] text-[#b8bcc4] normal-case">{meaning}</span>
+                        <code className="font-mono text-[11px] text-tip-ink">{syntax}</code>
+                        <span className="ml-1.5 text-[11px] text-tip-muted normal-case">{meaning}</span>
                     </span>
                 ))}
-                <span className="mt-2 block border-t border-[#3a3f47] pt-2 text-[11px] text-[#b8bcc4] normal-case">
+                <span className="mt-2 block border-t border-tip-border pt-2 text-[11px] text-tip-muted normal-case">
                     Block rules require a filter.
                 </span>
             </span>
@@ -58,7 +58,7 @@ export function App() {
             <AppHeader started={started} onToggle={toggleStarted} />
             <StatusBar started={started} registeredCount={registeredCount} />
 
-            {error && <p className="gutter mt-4 mb-0 font-mono text-[13px] text-[#dc2626]">{error}</p>}
+            {error && <p className="gutter mt-4 mb-0 font-mono text-[13px] text-danger">{error}</p>}
 
             {/*
              * Fixed layout : otherwise the group cards, which span every
@@ -100,7 +100,7 @@ export function App() {
                 <button
                     type="button"
                     onClick={addGroup}
-                    className="flex-none cursor-pointer rounded-md border border-accent bg-white px-[22px] py-3 text-sm font-semibold text-accent hover:bg-accent-soft">
+                    className="flex-none cursor-pointer rounded-md border border-accent bg-card px-[22px] py-3 text-sm font-semibold text-accent hover:bg-accent-soft">
                     + Add group
                 </button>
                 <p className="m-0 leading-relaxed text-muted">

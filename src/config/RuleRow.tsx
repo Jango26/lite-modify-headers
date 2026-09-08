@@ -28,7 +28,7 @@ interface RuleRowProps {
 export function RuleRow({rule, isFirst, isLast, onChange, onMove, onCopy, onRemove, flash, onFlashEnd}: RuleRowProps) {
     return (
         <tr
-            className={`rounded-lg bg-white shadow-[0_0_0_1px_var(--color-border)] ${flash ? 'flash-new' : ''}`}
+            className={`rounded-lg bg-card shadow-[0_0_0_1px_var(--color-border)] ${flash ? 'flash-new' : ''}`}
             onAnimationEnd={onFlashEnd}>
             <Cell first>
                 <input
@@ -36,7 +36,7 @@ export function RuleRow({rule, isFirst, isLast, onChange, onMove, onCopy, onRemo
                     title="Activate / deactivate rule"
                     checked={rule.status === 'on'}
                     onChange={(event) => onChange({status: event.target.checked ? 'on' : 'off'})}
-                    className="relative m-0 h-[22px] w-[42px] flex-none cursor-pointer appearance-none rounded-full bg-border shadow-[inset_0_0_0_1px_#d5d8dd] transition-colors after:absolute after:top-0.5 after:left-0.5 after:size-[18px] after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-accent checked:shadow-none checked:after:translate-x-5"
+                    className="relative m-0 h-[22px] w-[42px] flex-none cursor-pointer appearance-none rounded-full bg-border shadow-[inset_0_0_0_1px_var(--color-fainter)] transition-colors after:absolute after:top-0.5 after:left-0.5 after:size-[18px] after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-accent checked:shadow-none checked:after:translate-x-5"
                 />
             </Cell>
             <Cell>

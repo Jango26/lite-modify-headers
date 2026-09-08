@@ -11,10 +11,10 @@ import {useEffect, useRef, useState} from 'react';
  * Tailwind resolves that collision by stylesheet order, not by class order.
  */
 export const FIELD =
-    'h-9 min-w-0 rounded-md border border-border bg-white px-2.5 text-[13px] focus:border-accent focus:outline-none';
+    'h-9 min-w-0 rounded-md border border-border bg-card px-2.5 text-[13px] focus:border-accent focus:outline-none';
 export const INPUT = `${FIELD} font-mono placeholder:text-faint disabled:bg-surface disabled:text-faint`;
 export const ICON_BTN =
-    'cursor-pointer border-none bg-transparent p-0 text-[11px] leading-none text-fainter hover:text-muted disabled:cursor-default disabled:text-[#eceef1]';
+    'cursor-pointer border-none bg-transparent p-0 text-[11px] leading-none text-fainter hover:text-muted disabled:cursor-default disabled:text-disabled';
 
 interface SelectProps<T extends string> {
     options: [T, string][];
@@ -71,17 +71,17 @@ export function DeleteButton({label, onConfirm}: DeleteButtonProps) {
                 type="button"
                 title={`Delete ${label}`}
                 onClick={() => setOpen((value) => !value)}
-                className={`${ICON_BTN} text-[17px] hover:text-[#dc2626]`}>
+                className={`${ICON_BTN} text-[17px] hover:text-danger`}>
                 ✕
             </button>
             {open && (
-                <div className="absolute top-full right-0 z-10 mt-1.5 w-[184px] rounded-lg border border-border bg-white p-3 text-left shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
+                <div className="absolute top-full right-0 z-10 mt-1.5 w-[184px] rounded-lg border border-border bg-card p-3 text-left shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
                     <p className="m-0 mb-2.5 text-[13px] text-muted">Delete this {label}?</p>
                     <div className="flex justify-end gap-2">
                         <button
                             type="button"
                             onClick={() => setOpen(false)}
-                            className="cursor-pointer rounded-md border border-border bg-white px-2.5 py-1 text-[12px] text-muted hover:bg-surface">
+                            className="cursor-pointer rounded-md border border-border bg-card px-2.5 py-1 text-[12px] text-muted hover:bg-surface">
                             Cancel
                         </button>
                         <button
@@ -90,7 +90,7 @@ export function DeleteButton({label, onConfirm}: DeleteButtonProps) {
                                 setOpen(false);
                                 onConfirm();
                             }}
-                            className="cursor-pointer rounded-md border-none bg-[#dc2626] px-2.5 py-1 text-[12px] font-semibold text-white hover:bg-[#b91c1c]">
+                            className="cursor-pointer rounded-md border-none bg-danger px-2.5 py-1 text-[12px] font-semibold text-white hover:bg-danger-hover">
                             Delete
                         </button>
                     </div>

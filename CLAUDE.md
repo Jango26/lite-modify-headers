@@ -71,3 +71,16 @@ Tailwind v4，无 `tailwind.config.js`——设计变量写在 `src/index.css` �
 主题色是绿色 `#34a853`，`--color-accent` 和 `--color-running` 用的是同一个值：图标本来就在规则生效时变绿，所以「品牌色」和「正在运行」故意是同一个信号。`scripts/make-icons.mjs` 里的 `STATES.green` 也是这个值，改的时候两处一起改。
 
 内容区宽度锁在 1160px 居中，靠自定义 `@utility gutter`（`padding-inline: max(40px, calc((100% - 1160px) / 2))`）。用 padding 而不是包一层容器，是为了让状态栏这种通栏色块的背景能铺满整个宽度。
+
+### 暗色主题
+
+**亮暗两套值写在同一个 token 里**，用 CSS `light-dark(亮, 暗)`，由 `color-scheme` 决定取哪边——所以「跟随系统」是纯 CSS，不需要 JS，也不会闪错主题。新增颜色**必须**走 `@theme` 的 token，组件里别再写 `bg-white` / `text-[#xxx]`，否则暗色下就是一块亮斑。`--color-accent` / `--color-running` 和白色滑块（`after:bg-white`）是刻意不随主题变的：绿色是图标色（图标没有暗色版），白圆点压在有色轨道上两个主题都成立。
+
+两个坑：
+
+- **`light-dark()` 的颜色不能加 Tailwind 透明度修饰符**，`bg-card/50` 会编译出非法 CSS。目前没有这种用法。
+- **`data-theme` 只在明确选了亮/暗时才写**，跟随系统时是没有这个属性的（`html` 上的 `color-scheme: light dark` 就是默认态）。判断当前主题别读 `data-theme` 当真值。
+
+偏好是三态 `system` / `light` / `dark`（`src/lib/theme.ts`），存 `chrome.storage.local` 的 **`theme` 独立键**——它是显示偏好不是规则表，故意不进 `config`，这样不用动 `CONFIG_FORMAT_VERSION` 和 `migrateConfig`。配置页顶栏的 `ThemeToggle` 循环切换，popup 只跟随不切换，两边靠 `storage.onChanged` 联动。
+
+偏好同时**镜像一份到 `localStorage`**：`chrome.storage` 是异步的，明确选了暗色时会先闪一帧系统主题。`bootTheme()` 同步读这份镜像，在 React render 前打上 `data-theme`。它只能放在 `main.tsx` 顶部——MV3 页面 CSP 禁内联脚本，塞进 html 里不会执行。

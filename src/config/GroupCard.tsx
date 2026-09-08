@@ -51,7 +51,7 @@ export function GroupCard({
 }: GroupCardProps) {
     return (
         <div
-            className={`rounded-lg bg-white shadow-[0_0_0_1px_var(--color-border)] ${flash ? 'flash-new' : ''}`}
+            className={`rounded-lg bg-card shadow-[0_0_0_1px_var(--color-border)] ${flash ? 'flash-new' : ''}`}
             onAnimationEnd={onFlashEnd}>
             <div className="flex items-center gap-2.5 border-b border-border px-[18px] py-3">
                 <input
@@ -59,7 +59,7 @@ export function GroupCard({
                     title="Activate / deactivate the whole group"
                     checked={group.status === 'on'}
                     onChange={(event) => onChange({status: event.target.checked ? 'on' : 'off'})}
-                    className="relative m-0 h-[22px] w-[42px] flex-none cursor-pointer appearance-none rounded-full bg-border shadow-[inset_0_0_0_1px_#d5d8dd] transition-colors after:absolute after:top-0.5 after:left-0.5 after:size-[18px] after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-accent checked:shadow-none checked:after:translate-x-5"
+                    className="relative m-0 h-[22px] w-[42px] flex-none cursor-pointer appearance-none rounded-full bg-border shadow-[inset_0_0_0_1px_var(--color-fainter)] transition-colors after:absolute after:top-0.5 after:left-0.5 after:size-[18px] after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-accent checked:shadow-none checked:after:translate-x-5"
                 />
                 <span className="flex-none rounded bg-accent-soft px-2 py-1 font-mono text-[11px] font-semibold text-accent-ink">
                     GROUP
@@ -128,7 +128,7 @@ function HeaderRow({header, onChange, onCopy, onRemove, flash, onFlashEnd}: Head
                 title="Activate / deactivate header"
                 checked={header.status === 'on'}
                 onChange={(event) => onChange({status: event.target.checked ? 'on' : 'off'})}
-                className="relative m-0 h-[22px] w-[42px] flex-none cursor-pointer appearance-none rounded-full bg-border shadow-[inset_0_0_0_1px_#d5d8dd] transition-colors after:absolute after:top-0.5 after:left-0.5 after:size-[18px] after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-accent checked:shadow-none checked:after:translate-x-5"
+                className="relative m-0 h-[22px] w-[42px] flex-none cursor-pointer appearance-none rounded-full bg-border shadow-[inset_0_0_0_1px_var(--color-fainter)] transition-colors after:absolute after:top-0.5 after:left-0.5 after:size-[18px] after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-accent checked:shadow-none checked:after:translate-x-5"
             />
             <Select
                 options={TYPE_LABELS}
