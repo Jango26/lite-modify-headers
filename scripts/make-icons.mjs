@@ -1,6 +1,6 @@
 /**
- * Generates the extension icons: a stack of three rounded bars standing in for
- * the rows of the rules table. Monochrome, matching the config page theme.
+ * Generates the extension icons: a bold letter M, full-bleed on the canvas.
+ * Green when rules are running, grey when stopped.
  *
  * Run with `node scripts/make-icons.mjs`. Only needed when the icon changes.
  */
@@ -8,27 +8,47 @@ import {deflateSync} from 'node:zlib';
 import {writeFileSync, mkdirSync} from 'node:fs';
 
 /**
- * Bar geometry on a 32x32 design grid, scaled to whatever size is rendered.
- * Kept near the edges: the browser already pads the toolbar icon, so leaving a
- * wide margin here would double up and render the mark small.
+ * The M outline on a 32x32 design grid, as a closed polygon walked clockwise
+ * from the top-left. Only a hair of margin: the browser already pads the
+ * toolbar icon, so anything more here renders the mark small.
  */
 const GRID = 32;
-const BARS = [
-    {x: 2, y: 2.5, w: 28, h: 6.5},
-    {x: 2, y: 12.75, w: 17, h: 6.5},
-    {x: 2, y: 23, w: 23, h: 6.5}
+const M = [
+    [1, 1],
+    [9.5, 1],
+    [16, 12],
+    [22.5, 1],
+    [31, 1],
+    [31, 31],
+    [23.5, 31],
+    [23.5, 12.5],
+    [17.5, 22.5],
+    [14.5, 22.5],
+    [8.5, 12.5],
+    [8.5, 31],
+    [1, 31]
 ];
-const RADIUS = 3.25;
 const SAMPLES = 4;
 
-/** Coverage of one pixel by the bar set, via NxN supersampling. */
+/** Even-odd crossing test against the polygon edges. */
+function inside(x, y) {
+    let hit = false;
+    for (let i = 0, j = M.length - 1; i < M.length; j = i++) {
+        const [xi, yi] = M[i];
+        const [xj, yj] = M[j];
+        if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) hit = !hit;
+    }
+    return hit;
+}
+
+/** Coverage of one pixel by the mark, via NxN supersampling. */
 function coverage(px, py, scale, fill) {
     let hits = 0;
     for (let sy = 0; sy < SAMPLES; sy++) {
         for (let sx = 0; sx < SAMPLES; sx++) {
             const x = toDesign((px + (sx + 0.5) / SAMPLES) / scale, fill);
             const y = toDesign((py + (sy + 0.5) / SAMPLES) / scale, fill);
-            if (BARS.some((bar) => insideRoundedRect(x, y, bar))) hits++;
+            if (inside(x, y)) hits++;
         }
     }
     return hits / (SAMPLES * SAMPLES);
@@ -37,16 +57,6 @@ function coverage(px, py, scale, fill) {
 /** Maps a grid coordinate back onto the design grid for a mark centred at `fill` scale. */
 function toDesign(v, fill) {
     return (v - (GRID * (1 - fill)) / 2) / fill;
-}
-
-function insideRoundedRect(x, y, {x: rx, y: ry, w, h}) {
-    if (x < rx || x > rx + w || y < ry || y > ry + h) return false;
-
-    // Clamp to the rectangle inset by the corner radius; the distance from that
-    // point is inside the radius everywhere except past a corner.
-    const cx = Math.min(Math.max(x, rx + RADIUS), rx + w - RADIUS);
-    const cy = Math.min(Math.max(y, ry + RADIUS), ry + h - RADIUS);
-    return (x - cx) ** 2 + (y - cy) ** 2 <= RADIUS ** 2;
 }
 
 function renderRgba(size, [r, g, b], fill) {
@@ -98,10 +108,8 @@ function encodePng(size, rgba) {
     ]);
 }
 
-const STATES = {
-    idle: [0x3c, 0x40, 0x43],
-    green: [0x34, 0xa8, 0x53]
-};
+/** Green matches `--color-accent` in src/index.css; change both together. */
+const COLOR = [0x34, 0xa8, 0x53];
 
 /**
  * Toolbar sizes render the mark full-bleed, since the browser supplies its own
@@ -111,14 +119,12 @@ const SIZES = [
     {size: 16, fill: 1},
     {size: 32, fill: 1},
     {size: 48, fill: 1},
-    {size: 128, fill: 0.8}
+    {size: 128, fill: 0.86}
 ];
 
 mkdirSync('public/icons', {recursive: true});
-for (const [state, rgb] of Object.entries(STATES)) {
-    for (const {size, fill} of SIZES) {
-        const name = state === 'idle' ? `rows-${size}.png` : `rows-green-${size}.png`;
-        writeFileSync(`public/icons/${name}`, encodePng(size, renderRgba(size, rgb, fill)));
-        console.log(`public/icons/${name}`);
-    }
+for (const {size, fill} of SIZES) {
+    const name = `m-${size}.png`;
+    writeFileSync(`public/icons/${name}`, encodePng(size, renderRgba(size, COLOR, fill)));
+    console.log(`public/icons/${name}`);
 }

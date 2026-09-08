@@ -3,7 +3,7 @@
  * Pure functions only : no chrome API, no DOM, so this stays testable.
  */
 
-export const CONFIG_FORMAT_VERSION = '3.0';
+export const CONFIG_FORMAT_VERSION = '3.1';
 
 export type RuleAction = 'set' | 'delete' | 'block';
 export type RuleTarget = 'req' | 'res';
@@ -28,6 +28,13 @@ export interface Rule {
 export type GroupHeaderAction = Exclude<RuleAction, 'block'>;
 
 export interface GroupHeader {
+    /*
+     * Stable identity, only used by the configuration page as a React key.
+     * Positions shift when a line is inserted, moved or removed, and a
+     * position based key makes React reuse a DOM node for another line, which
+     * replays the toggle transitions on every neighbour.
+     */
+    id: string;
     status: RuleStatus;
     apply_on: RuleTarget;
     action: GroupHeaderAction;
@@ -37,10 +44,12 @@ export interface GroupHeader {
 
 export interface RuleItem extends Rule {
     kind: 'rule';
+    id: string;
 }
 
 export interface GroupItem {
     kind: 'group';
+    id: string;
     status: RuleStatus;
     name: string;
     url_filter: string;
@@ -79,6 +88,19 @@ const ALL_RESOURCE_TYPES: chrome.declarativeNetRequest.ResourceType[] = [
 
 /** CONFIGURATION MODEL **/
 
+/*
+ * Identities only have to be unique inside one configuration, so a counter is
+ * enough and keeps the migrated ids readable. randomUUID is used when
+ * available so two configurations merged by hand cannot collide.
+ */
+let idCounter = 0;
+
+export function newId(): string {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+    idCounter += 1;
+    return `id-${idCounter}`;
+}
+
 export function createEmptyRule(): Rule {
     return {
         status: 'on',
@@ -92,15 +114,15 @@ export function createEmptyRule(): Rule {
 }
 
 export function createEmptyRuleItem(): RuleItem {
-    return {kind: 'rule', ...createEmptyRule()};
+    return {kind: 'rule', id: newId(), ...createEmptyRule()};
 }
 
 export function createEmptyGroupHeader(): GroupHeader {
-    return {status: 'on', apply_on: 'req', action: 'set', header_name: '', header_value: ''};
+    return {id: newId(), status: 'on', apply_on: 'req', action: 'set', header_name: '', header_value: ''};
 }
 
 export function createEmptyGroup(): GroupItem {
-    return {kind: 'group', status: 'on', name: '', url_filter: '', headers: [createEmptyGroupHeader()]};
+    return {kind: 'group', id: newId(), status: 'on', name: '', url_filter: '', headers: [createEmptyGroupHeader()]};
 }
 
 export function getDefaultConfig(): Config {
@@ -153,11 +175,27 @@ interface LegacyConfig {
     use_url_contains?: boolean;
     headers?: LegacyHeader[];
     rules?: Rule[];
+    /* 3.0 already had the mixed item list, only without the ids. */
+    items?: ConfigItem[];
 }
 
 function toItems(rules: Rule[]): ConfigItem[] {
-    const items: ConfigItem[] = rules.map((rule) => ({kind: 'rule', ...rule}));
+    const items: ConfigItem[] = rules.map((rule) => ({kind: 'rule', id: newId(), ...rule}));
     return items.length > 0 ? items : [createEmptyRuleItem()];
+}
+
+/** A 3.0 configuration is complete except for the item and header ids. */
+function migrateV3(legacy: LegacyConfig): Config {
+    const items = (legacy.items || []).map((item) =>
+        item.kind === 'group'
+            ? {...item, id: newId(), headers: item.headers.map((header) => ({...header, id: newId()}))}
+            : {...item, id: newId()}
+    );
+    return {
+        format_version: CONFIG_FORMAT_VERSION,
+        debug_mode: !!legacy.debug_mode,
+        items: items.length > 0 ? items : [createEmptyRuleItem()]
+    };
 }
 
 /** A 2.0 configuration only needs each of its rules wrapped into an item. */
@@ -193,6 +231,7 @@ export function migrateConfig(stored: Config | LegacyConfig): Config {
     if (stored.format_version === CONFIG_FORMAT_VERSION) return stored as Config;
 
     const legacy = stored as LegacyConfig;
+    if (legacy.items) return migrateV3(legacy);
     if (legacy.rules) return migrateV2(legacy);
     if (legacy.headers) return migrateV1(legacy);
     return getDefaultConfig();

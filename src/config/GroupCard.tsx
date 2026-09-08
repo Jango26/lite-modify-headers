@@ -1,5 +1,5 @@
 import type {GroupHeader, GroupHeaderAction, GroupItem, RuleTarget} from '../lib/config';
-import {DeleteButton, FIELD, INPUT, MoveButtons, Select} from './fields';
+import {CopyButton, DeleteButton, FIELD, INPUT, MoveButtons, Select} from './fields';
 
 const GROUP_ACTION_LABELS: [GroupHeaderAction, string][] = [
     ['set', 'Set'],
@@ -19,8 +19,14 @@ interface GroupCardProps {
     onHeaderChange: (headerIndex: number, changes: Partial<GroupHeader>) => void;
     onAddHeader: () => void;
     onRemoveHeader: (headerIndex: number) => void;
+    onCopyHeader: (headerIndex: number) => void;
     onMove: (offset: number) => void;
+    onCopy: () => void;
     onRemove: () => void;
+    /* Highlights the card, or one of its header rows, right after a copy. */
+    flash: boolean;
+    flashedHeader: string | null;
+    onFlashEnd: () => void;
 }
 
 /*
@@ -35,11 +41,18 @@ export function GroupCard({
     onHeaderChange,
     onAddHeader,
     onRemoveHeader,
+    onCopyHeader,
     onMove,
-    onRemove
+    onCopy,
+    onRemove,
+    flash,
+    flashedHeader,
+    onFlashEnd
 }: GroupCardProps) {
     return (
-        <div className="rounded-lg bg-white shadow-[0_0_0_1px_var(--color-border)]">
+        <div
+            className={`rounded-lg bg-white shadow-[0_0_0_1px_var(--color-border)] ${flash ? 'flash-new' : ''}`}
+            onAnimationEnd={onFlashEnd}>
             <div className="flex items-center gap-2.5 border-b border-border px-[18px] py-3">
                 <input
                     type="checkbox"
@@ -69,16 +82,20 @@ export function GroupCard({
                     />
                 </label>
                 <MoveButtons isFirst={isFirst} isLast={isLast} onMove={onMove} label="group" />
+                <CopyButton label="group" onCopy={onCopy} />
                 <DeleteButton label="group" onConfirm={onRemove} />
             </div>
 
             <div className="px-[18px] py-2.5">
                 {group.headers.map((header, headerIndex) => (
                     <HeaderRow
-                        key={headerIndex}
+                        key={header.id}
                         header={header}
                         onChange={(changes) => onHeaderChange(headerIndex, changes)}
+                        onCopy={() => onCopyHeader(headerIndex)}
                         onRemove={() => onRemoveHeader(headerIndex)}
+                        flash={flashedHeader === header.id}
+                        onFlashEnd={onFlashEnd}
                     />
                 ))}
                 <button
@@ -95,12 +112,17 @@ export function GroupCard({
 interface HeaderRowProps {
     header: GroupHeader;
     onChange: (changes: Partial<GroupHeader>) => void;
+    onCopy: () => void;
     onRemove: () => void;
+    flash: boolean;
+    onFlashEnd: () => void;
 }
 
-function HeaderRow({header, onChange, onRemove}: HeaderRowProps) {
+function HeaderRow({header, onChange, onCopy, onRemove, flash, onFlashEnd}: HeaderRowProps) {
     return (
-        <div className="flex items-center gap-2.5 py-1.5">
+        <div
+            className={`flex items-center gap-2.5 rounded-md py-1.5 ${flash ? 'flash-new' : ''}`}
+            onAnimationEnd={onFlashEnd}>
             <input
                 type="checkbox"
                 title="Activate / deactivate header"
@@ -135,6 +157,7 @@ function HeaderRow({header, onChange, onRemove}: HeaderRowProps) {
                 disabled={header.action !== 'set'}
                 onChange={(event) => onChange({header_value: event.target.value})}
             />
+            <CopyButton label="header" onCopy={onCopy} />
             <DeleteButton label="header" onConfirm={onRemove} />
         </div>
     );

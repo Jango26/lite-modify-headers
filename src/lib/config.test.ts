@@ -18,6 +18,14 @@ import {
     type RuleItem
 } from './config';
 
+/*
+ * Ids are freshly minted every time an item is created, so comparing a
+ * migrated item to a newly built one has to ignore them.
+ */
+function withoutIds<T>(value: T): T {
+    return JSON.parse(JSON.stringify(value, (key, entry) => (key === 'id' ? undefined : entry)));
+}
+
 describe('Rule conversion', () => {
     function rule(overrides: Partial<Rule> = {}): Rule {
         return {...createEmptyRule(), header_name: 'x-test', ...overrides};
@@ -149,7 +157,7 @@ describe('Config migration', () => {
             })
         );
         expect(migrated.items.length).toEqual(1);
-        expect(migrated.items[0]).toEqual(createEmptyRuleItem());
+        expect(withoutIds(migrated.items[0])).toEqual(withoutIds(createEmptyRuleItem()));
     });
 
     it('carries url_contains over only when it was active', () => {
@@ -161,22 +169,42 @@ describe('Config migration', () => {
     });
 
     it('always leaves at least one editable rule', () => {
-        expect(migrateConfig(v1Config({headers: []})).items).toEqual([createEmptyRuleItem()]);
+        expect(withoutIds(migrateConfig(v1Config({headers: []})).items)).toEqual(withoutIds([createEmptyRuleItem()]));
     });
 
     it('falls back to the default config when there is nothing to migrate', () => {
-        expect(migrateConfig({format_version: '1.2'})).toEqual(getDefaultConfig());
+        expect(withoutIds(migrateConfig({format_version: '1.2'}))).toEqual(withoutIds(getDefaultConfig()));
     });
 
     it('wraps the rules of a 2.0 configuration into items', () => {
         const rule = {...createEmptyRule(), header_name: 'x-two'};
         const migrated = migrateConfig({format_version: '2.0', debug_mode: true, rules: [rule]});
-        expect(migrated.items).toEqual([{kind: 'rule', ...rule}]);
+        expect(withoutIds(migrated.items)).toEqual([{kind: 'rule', ...rule}]);
         expect(migrated.debug_mode).toEqual(true);
     });
 
     it('leaves at least one editable rule when a 2.0 configuration was empty', () => {
-        expect(migrateConfig({format_version: '2.0', rules: []}).items).toEqual([createEmptyRuleItem()]);
+        expect(withoutIds(migrateConfig({format_version: '2.0', rules: []}).items)).toEqual(
+            withoutIds([createEmptyRuleItem()])
+        );
+    });
+
+    it('gives every item and group header of a 3.0 configuration a fresh id', () => {
+        const stored = {
+            format_version: '3.0',
+            debug_mode: false,
+            items: [
+                {kind: 'rule', ...createEmptyRule()},
+                {kind: 'group', status: 'on', name: 'g', url_filter: 'api', headers: [createEmptyGroupHeader()]}
+            ]
+        };
+        const migrated = migrateConfig(stored as never);
+
+        const group = migrated.items[1] as GroupItem;
+        const ids = [migrated.items[0].id, group.id, group.headers[0].id];
+        expect(ids.every((id) => typeof id === 'string' && id.length > 0)).toBe(true);
+        expect(new Set(ids).size).toEqual(3);
+        expect(withoutIds(migrated.items)).toEqual(withoutIds(stored.items));
     });
 });
 

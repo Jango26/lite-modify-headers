@@ -36,3 +36,22 @@
 @utility gutter {
     padding-inline: max(40px, calc((100% - 1160px) / 2));
 }
+
+/*
+ * A freshly duplicated rule / group / header looks exactly like its source, so
+ * it briefly flashes green to say "this one is the new copy". It fades back to
+ * white because every target sits on a white surface — the rule rows and group
+ * cards are white, and the header rows live inside a white card.
+ */
+@keyframes flash-new {
+    from {
+        background-color: var(--color-accent-soft);
+    }
+    to {
+        background-color: #fff;
+    }
+}
+
+@utility flash-new {
+    animation: flash-new 1.2s ease-out;
+}

@@ -1,5 +1,5 @@
 import type {Rule, RuleAction, RuleTarget} from '../lib/config';
-import {DeleteButton, FIELD, INPUT, MoveButtons, Select} from './fields';
+import {CopyButton, DeleteButton, FIELD, INPUT, MoveButtons, Select} from './fields';
 
 const ACTION_LABELS: [RuleAction, string][] = [
     ['set', 'Set'],
@@ -18,12 +18,18 @@ interface RuleRowProps {
     isLast: boolean;
     onChange: (changes: Partial<Rule>) => void;
     onMove: (offset: number) => void;
+    onCopy: () => void;
     onRemove: () => void;
+    /* Highlights the row right after it was created as a copy. */
+    flash: boolean;
+    onFlashEnd: () => void;
 }
 
-export function RuleRow({rule, isFirst, isLast, onChange, onMove, onRemove}: RuleRowProps) {
+export function RuleRow({rule, isFirst, isLast, onChange, onMove, onCopy, onRemove, flash, onFlashEnd}: RuleRowProps) {
     return (
-        <tr className="rounded-lg bg-white shadow-[0_0_0_1px_var(--color-border)]">
+        <tr
+            className={`rounded-lg bg-white shadow-[0_0_0_1px_var(--color-border)] ${flash ? 'flash-new' : ''}`}
+            onAnimationEnd={onFlashEnd}>
             <Cell first>
                 <input
                     type="checkbox"
@@ -89,6 +95,9 @@ export function RuleRow({rule, isFirst, isLast, onChange, onMove, onRemove}: Rul
             </Cell>
             <Cell>
                 <MoveButtons isFirst={isFirst} isLast={isLast} onMove={onMove} label="rule" />
+            </Cell>
+            <Cell>
+                <CopyButton label="rule" onCopy={onCopy} />
             </Cell>
             <Cell last>
                 <DeleteButton label="rule" onConfirm={onRemove} />

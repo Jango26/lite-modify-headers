@@ -21,6 +21,7 @@ const COLUMNS: [string, string, boolean?][] = [
     ['VALUE', ''],
     ['URL FILTER', '', true],
     ['', 'w-10'],
+    ['', 'w-10'],
     ['', 'w-10']
 ];
 
@@ -79,7 +80,7 @@ export function App() {
                 <tbody>
                     {config.items.map((item, index) => (
                         <ItemRow
-                            key={index}
+                            key={item.id}
                             item={item}
                             index={index}
                             isLast={index === config.items.length - 1}
@@ -133,7 +134,10 @@ interface ItemRowProps {
 function ItemRow({item, index, isLast, edit}: ItemRowProps) {
     const isFirst = index === 0;
     const onMove = (offset: number) => edit.moveItem(index, index + offset);
+    const onCopy = () => edit.duplicateItem(index);
     const onRemove = () => edit.removeItem(index);
+    const flash = edit.flashed === item.id;
+    const onFlashEnd = edit.clearFlashed;
 
     if (item.kind === 'group')
         return (
@@ -147,8 +151,13 @@ function ItemRow({item, index, isLast, edit}: ItemRowProps) {
                         onHeaderChange={(headerIndex, changes) => edit.updateHeader(index, headerIndex, changes)}
                         onAddHeader={() => edit.addHeader(index)}
                         onRemoveHeader={(headerIndex) => edit.removeHeader(index, headerIndex)}
+                        onCopyHeader={(headerIndex) => edit.duplicateHeader(index, headerIndex)}
                         onMove={onMove}
+                        onCopy={onCopy}
                         onRemove={onRemove}
+                        flash={flash}
+                        flashedHeader={edit.flashed}
+                        onFlashEnd={onFlashEnd}
                     />
                 </td>
             </tr>
@@ -161,7 +170,10 @@ function ItemRow({item, index, isLast, edit}: ItemRowProps) {
             isLast={isLast}
             onChange={(changes) => edit.updateRule(index, changes)}
             onMove={onMove}
+            onCopy={onCopy}
             onRemove={onRemove}
+            flash={flash}
+            onFlashEnd={onFlashEnd}
         />
     );
 }

@@ -14,7 +14,7 @@ Chromium（Chrome / Edge）浏览器扩展，Manifest V3，根据规则表改写
 
 - **`npm run dev`**：启动 Vite，产出带 HMR 的 `dist/`。改 React 组件浏览器里即时刷新，改 `manifest.json` / service worker 需要在扩展页手动 reload。
 - **`npm run build`**：先 `tsc --noEmit` 再 `vite build`，类型错误会直接阻断构建。
-- **`npm test`**：Vitest 跑 `src/lib/config.test.ts`（31 条）。`npm run test:watch` 是 watch 模式。
+- **`npm test`**：Vitest 跑 `src/lib/config.test.ts`（32 条）。`npm run test:watch` 是 watch 模式。
 - **加载调试**：`chrome://extensions` → 开发者模式 → “加载已解压的扩展程序” 指向 **`dist/`**（不是仓库根目录）。
 - **格式化**：`npm run format`（4 空格、单引号、无 trailing comma、printWidth 120）。
 
@@ -43,12 +43,12 @@ Chromium（Chrome / Edge）浏览器扩展，Manifest V3，根据规则表改写
 
 ## 配置格式
 
-存 `chrome.storage.local` 的 `config` 键（JSON 字符串），启停状态存 `started`（`'on'`/`'off'`）。当前 `CONFIG_FORMAT_VERSION = '3.0'`：
+存 `chrome.storage.local` 的 `config` 键（JSON 字符串），启停状态存 `started`（`'on'`/`'off'`）。当前 `CONFIG_FORMAT_VERSION = '3.1'`：
 
 ```
 {format_version, debug_mode, items: [
-  {kind: 'rule',  status, name, apply_on, action, header_name, header_value, url_filter},
-  {kind: 'group', status, name, url_filter, headers: [{status, apply_on, action, header_name, header_value}]}
+  {kind: 'rule',  id, status, name, apply_on, action, header_name, header_value, url_filter},
+  {kind: 'group', id, status, name, url_filter, headers: [{id, status, apply_on, action, header_name, header_value}]}
 ]}
 ```
 
@@ -56,11 +56,13 @@ Chromium（Chrome / Edge）浏览器扩展，Manifest V3，根据规则表改写
 
 `convertItemsToDynamicRules` = `flattenItems`（展开 group）+ `convertRulesToDynamicRules`。**优先级在展开后才计算**，所以一个 group 会在它所在的位置占掉 N 个优先级槽位。
 
+`id`（3.1 起）只服务于配置页的 React key，浏览器侧完全用不到。**不能用数组下标当 key**：插入/删除/移动会让后面每一项的下标错位，React 于是把某一行的 DOM 复用给相邻行的数据，开关的 `transition-colors` 把 on/off 差异播成滑动动画，输入框焦点也会串。`newId()` 优先用 `crypto.randomUUID()`。
+
 `action` 为 `set` / `delete` / `block`；`apply_on` 为 `req` / `res`。
 
 `url_filter` 空 = 所有 URL；用 `/.../` 包裹 = 正则（转成 `regexFilter`）；否则按子串匹配（`urlFilter`）。`block` 规则**必须**有 filter，否则会拦截一切，`isRuleComplete` 会跳过它。
 
-旧配置由 `migrateConfig` 迁移，按 `rules` / `headers` 字段判断来源：2.0 只是把每条 rule 包成 `{kind: 'rule'}`；1.x 额外做 `add`/`modify` → `set`、丢弃 cookie 动作（MV3 无法逐条改 cookie）、`url_contains` 仅在原来开了 `use_url_contains` 时才转为 `url_filter`。`loadState` 会返回 `migrated` 标记，配置页据此立刻落盘，避免每次加载都重跑迁移。
+旧配置由 `migrateConfig` 迁移，按 `items` / `rules` / `headers` 字段判断来源：3.0 只缺 `id`，逐项补上；2.0 只是把每条 rule 包成 `{kind: 'rule'}`；1.x 额外做 `add`/`modify` → `set`、丢弃 cookie 动作（MV3 无法逐条改 cookie）、`url_contains` 仅在原来开了 `use_url_contains` 时才转为 `url_filter`。`loadState` 会返回 `migrated` 标记，配置页据此立刻落盘，避免每次加载都重跑迁移。
 
 ## 样式
 

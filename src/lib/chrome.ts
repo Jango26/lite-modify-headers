@@ -48,9 +48,19 @@ export async function storeStarted(started: boolean): Promise<void> {
 
 /** declarativeNetRequest REGISTRATION **/
 
-/* Green M when running, grey M when stopped. */
-function setExtensionIcon(started: boolean): void {
-    chrome.action.setIcon({path: started ? '/icons/m-32.png' : '/icons/m-gray-32.png'});
+const RED = '#d93025';
+const GREEN = '#34a853';
+
+/*
+ * The icon itself never changes; the badge carries the state. Stopped shows a
+ * red OFF, running shows the number of registered rules in green. Both are a
+ * solid fill with white text : a transparent badge sits right on top of the
+ * M's lower right stroke, where green on green is unreadable.
+ */
+function setBadge(text: string, background: string): void {
+    chrome.action.setBadgeText({text});
+    chrome.action.setBadgeBackgroundColor({color: background});
+    chrome.action.setBadgeTextColor({color: '#ffffff'});
 }
 
 async function removeDynamicRules(): Promise<void> {
@@ -73,18 +83,22 @@ export const TOO_MANY_RULES_ERROR = 'Too many rules for the browser. Please disa
  */
 export async function applyConfig(config: Config, started: boolean): Promise<string | null> {
     await removeDynamicRules();
-    setExtensionIcon(started);
-    if (!started || !config.items) return null;
+    if (!started || !config.items) {
+        setBadge('OFF', RED);
+        return null;
+    }
 
     const rules = convertItemsToDynamicRules(config.items);
     debug('Add rules : ' + JSON.stringify(rules));
 
     if (exceedsBrowserRuleLimit(rules)) {
         console.log(TOO_MANY_RULES_ERROR);
+        setBadge('!', RED);
         return TOO_MANY_RULES_ERROR;
     }
 
     await chrome.declarativeNetRequest.updateDynamicRules({addRules: rules});
+    setBadge(rules.length === 0 ? '' : String(rules.length), GREEN);
     return null;
 }
 

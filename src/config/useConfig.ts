@@ -5,6 +5,7 @@ import {
     createEmptyGroupHeader,
     createEmptyRuleItem,
     getDefaultConfig,
+    newId,
     type Config,
     type ConfigItem,
     type GroupHeader,
@@ -28,6 +29,11 @@ export function useConfig() {
      * made in the toolbar popup.
      */
     const lastWritten = useRef<string | null>(null);
+    /*
+     * Id of the item or group header that was just duplicated, so the page can
+     * flash it. It is cleared as soon as the animation ends.
+     */
+    const [flashed, setFlashed] = useState<string | null>(null);
 
     const save = useCallback(async (next: Config) => {
         lastWritten.current = JSON.stringify(next);
@@ -142,6 +148,18 @@ export function useConfig() {
         [config.items, withHeaders]
     );
 
+    const duplicateHeader = useCallback(
+        (index: number, headerIndex: number) => {
+            const target = config.items[index] as GroupItem;
+            const headers = [...target.headers];
+            const copy = {...headers[headerIndex], id: newId()};
+            headers.splice(headerIndex + 1, 0, copy);
+            setFlashed(copy.id);
+            return withHeaders(index, headers);
+        },
+        [config.items, withHeaders]
+    );
+
     /* A group without a single header could no longer be edited, so keep one. */
     const removeHeader = useCallback(
         (index: number, headerIndex: number) => {
@@ -170,6 +188,26 @@ export function useConfig() {
         [commit, config.items, withItems]
     );
 
+    /*
+     * The copy lands right below its source so it keeps a neighbouring
+     * priority. Every clone gets a fresh id : reusing the source id would make
+     * React treat the two lines as the same one.
+     */
+    const duplicateItem = useCallback(
+        (index: number) => {
+            const source = config.items[index];
+            const copy: ConfigItem =
+                source.kind === 'group'
+                    ? {...source, id: newId(), headers: source.headers.map((header) => ({...header, id: newId()}))}
+                    : {...source, id: newId()};
+            const items = [...config.items];
+            items.splice(index + 1, 0, copy);
+            setFlashed(copy.id);
+            return commit(withItems(items));
+        },
+        [commit, config.items, withItems]
+    );
+
     const moveItem = useCallback(
         (index: number, target: number) => {
             if (target < 0 || target >= config.items.length) return;
@@ -192,9 +230,13 @@ export function useConfig() {
         updateHeader,
         addHeader,
         removeHeader,
+        duplicateHeader,
         addRule,
         addGroup,
         removeItem,
-        moveItem
+        duplicateItem,
+        moveItem,
+        flashed,
+        clearFlashed: useCallback(() => setFlashed(null), [])
     };
 }

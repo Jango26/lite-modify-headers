@@ -100,6 +100,38 @@ export function DeleteButton({label, onConfirm}: DeleteButtonProps) {
     );
 }
 
+/*
+ * Duplicating is trivially undone by deleting the copy, so unlike the delete
+ * button this one acts right away without a confirmation bubble.
+ *
+ * The glyph is inline SVG rather than a character like the neighbouring
+ * buttons : the Unicode copy symbols all render as some skewed pair of squares
+ * that depends on whichever font the system picks.
+ */
+export function CopyButton({label, onCopy}: {label: string; onCopy: () => void}) {
+    return (
+        <button
+            type="button"
+            title={`Duplicate ${label}`}
+            onClick={onCopy}
+            className={`${ICON_BTN} flex flex-none items-center justify-center hover:text-accent`}>
+            <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true">
+                <rect x="9" y="9" width="12" height="12" rx="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
+        </button>
+    );
+}
+
 interface MoveButtonsProps {
     isFirst: boolean;
     isLast: boolean;
