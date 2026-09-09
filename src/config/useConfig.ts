@@ -143,7 +143,9 @@ export function useConfig() {
     const addHeader = useCallback(
         (index: number) => {
             const target = config.items[index] as GroupItem;
-            return withHeaders(index, [...target.headers, createEmptyGroupHeader()]);
+            const added = createEmptyGroupHeader();
+            setFlashed(added.id);
+            return withHeaders(index, [...target.headers, added]);
         },
         [config.items, withHeaders]
     );
@@ -170,15 +172,18 @@ export function useConfig() {
         [config.items, withHeaders]
     );
 
-    const addRule = useCallback(
-        () => commit(withItems([...config.items, createEmptyRuleItem()])),
+    /* Newly added items flash just like copies do, so the eye can find them. */
+    const appendItem = useCallback(
+        (item: ConfigItem) => {
+            setFlashed(item.id);
+            return commit(withItems([...config.items, item]));
+        },
         [commit, config.items, withItems]
     );
 
-    const addGroup = useCallback(
-        () => commit(withItems([...config.items, createEmptyGroup()])),
-        [commit, config.items, withItems]
-    );
+    const addRule = useCallback(() => appendItem(createEmptyRuleItem()), [appendItem]);
+
+    const addGroup = useCallback(() => appendItem(createEmptyGroup()), [appendItem]);
 
     const removeItem = useCallback(
         (index: number) => {
