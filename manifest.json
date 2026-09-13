@@ -10,7 +10,7 @@
         "48": "icons/m-48.png",
         "128": "icons/m-128.png"
     },
-    "permissions": ["activeTab", "tabs", "storage", "declarativeNetRequest", "declarativeNetRequestWithHostAccess"],
+    "permissions": ["tabs", "storage", "declarativeNetRequest", "declarativeNetRequestWithHostAccess"],
     "host_permissions": ["*://*/*"],
     "action": {
         "default_icon": "icons/m-32.png",
