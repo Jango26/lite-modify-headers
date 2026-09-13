@@ -51,6 +51,12 @@
     --color-accent-hover: #2b8c45;
     --color-accent-soft: light-dark(#eaf6ee, #1e3a28);
     --color-accent-ink: light-dark(#1e7a3c, #6dd48a);
+    /*
+     * Background of a rule / group / header that is switched on. Much paler
+     * than accent-soft, which is a badge fill : this one covers a whole row, so
+     * it has to read as a tint rather than a block of colour.
+     */
+    --color-active: light-dark(#f2fbf5, #1c2a21);
     --color-running: #34a853;
     --color-running-soft: light-dark(#eaf6ee, #1e3a28);
     --color-danger: light-dark(#dc2626, #f16d6d);

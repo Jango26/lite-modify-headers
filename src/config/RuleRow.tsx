@@ -28,7 +28,7 @@ interface RuleRowProps {
 export function RuleRow({rule, isFirst, isLast, onChange, onMove, onCopy, onRemove, flash, onFlashEnd}: RuleRowProps) {
     return (
         <tr
-            className={`rounded-lg bg-card shadow-[0_0_0_1px_var(--color-border)] ${flash ? 'flash-new' : ''}`}
+            className={`rounded-lg ${rule.status === 'on' ? 'bg-active' : 'bg-card'} shadow-[0_0_0_1px_var(--color-border)] ${flash ? 'flash-new' : ''}`}
             onAnimationEnd={onFlashEnd}>
             <Cell first>
                 <input

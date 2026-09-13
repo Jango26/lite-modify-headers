@@ -51,7 +51,7 @@ export function GroupCard({
 }: GroupCardProps) {
     return (
         <div
-            className={`rounded-lg bg-card shadow-[0_0_0_1px_var(--color-border)] ${flash ? 'flash-new' : ''}`}
+            className={`rounded-lg ${group.status === 'on' ? 'bg-active' : 'bg-card'} shadow-[0_0_0_1px_var(--color-border)] ${flash ? 'flash-new' : ''}`}
             onAnimationEnd={onFlashEnd}>
             <div className="flex items-center gap-2.5 border-b border-border px-[18px] py-3">
                 <input
@@ -86,7 +86,7 @@ export function GroupCard({
                 <DeleteButton label="group" onConfirm={onRemove} />
             </div>
 
-            <div className="px-[18px] py-2.5">
+            <div className="flex flex-col gap-1.5 px-[18px] py-2.5">
                 {group.headers.map((header, headerIndex) => (
                     <HeaderRow
                         key={header.id}
@@ -101,7 +101,7 @@ export function GroupCard({
                 <button
                     type="button"
                     onClick={onAddHeader}
-                    className="mt-1 cursor-pointer border-none bg-transparent p-0 text-[13px] font-semibold text-accent hover:underline">
+                    className="cursor-pointer self-start border-none bg-transparent p-0 text-[13px] font-semibold text-accent hover:underline">
                     + Add header
                 </button>
             </div>
@@ -121,7 +121,7 @@ interface HeaderRowProps {
 function HeaderRow({header, onChange, onCopy, onRemove, flash, onFlashEnd}: HeaderRowProps) {
     return (
         <div
-            className={`flex items-center gap-2.5 rounded-md py-1.5 ${flash ? 'flash-new' : ''}`}
+            className={`flex items-center gap-2.5 rounded-md px-2 py-1.5 ${header.status === 'on' ? 'bg-active' : 'bg-card'} ${flash ? 'flash-new' : ''}`}
             onAnimationEnd={onFlashEnd}>
             <input
                 type="checkbox"
