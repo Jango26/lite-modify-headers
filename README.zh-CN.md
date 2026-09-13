@@ -40,6 +40,8 @@ npm run build
 
 打开 `chrome://extensions`，开启**开发者模式**，点击**加载已解压的扩展程序**，选择 **`dist/`** 目录（不是仓库根目录）。
 
+如果要的是能上传应用商店的压缩包，跑 `npm run zip` —— 它会先构建再打包出 `release/lite-modify-headers-<版本号>.zip`，版本号取自 `manifest.json`。
+
 ## 使用方法
 
 ### 1. 点击工具栏图标

@@ -40,6 +40,8 @@ npm run build
 
 Open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked** and select the **`dist/`** directory (not the repository root).
 
+To produce an uploadable archive instead, run `npm run zip` — it builds and writes `release/lite-modify-headers-<version>.zip`, with the version taken from `manifest.json`.
+
 ## Usage
 
 ### 1. Click the toolbar icon

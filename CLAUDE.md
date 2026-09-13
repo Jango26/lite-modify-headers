@@ -14,6 +14,7 @@ Chromium（Chrome / Edge）浏览器扩展，Manifest V3，根据规则表改写
 
 - **`npm run dev`**：启动 Vite，产出带 HMR 的 `dist/`。改 React 组件浏览器里即时刷新，改 `manifest.json` / service worker 需要在扩展页手动 reload。
 - **`npm run build`**：先 `tsc --noEmit` 再 `vite build`，类型错误会直接阻断构建。
+- **`npm run zip`**：先 `build`，再把 `dist/` 打成 `release/lite-modify-headers-<版本号>.zip`（版本号取自 `manifest.json`），用于上传应用商店。
 - **`npm test`**：Vitest 跑 `src/lib/config.test.ts`（32 条）。`npm run test:watch` 是 watch 模式。
 - **加载调试**：`chrome://extensions` → 开发者模式 → “加载已解压的扩展程序” 指向 **`dist/`**（不是仓库根目录）。
 - **格式化**：`npm run format`（4 空格、单引号、无 trailing comma、printWidth 120）。

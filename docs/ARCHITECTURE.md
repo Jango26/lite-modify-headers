@@ -14,6 +14,7 @@ Developer-facing notes for Lite Modify Headers. For what the extension does and 
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | `npm run dev`    | Vite dev server writing `dist/` with HMR. React edits refresh live; `manifest.json` and service worker edits need a manual extension reload. |
 | `npm run build`  | `tsc --noEmit` then `vite build` — type errors block the build.                                                                              |
+| `npm run zip`    | `build`, then zips `dist/` into `release/lite-modify-headers-<version>.zip` (version read from `manifest.json`) for store upload.             |
 | `npm test`       | Vitest over `src/lib/config.test.ts`. `npm run test:watch` for watch mode.                                                                   |
 | `npm run format` | Prettier: 4 spaces, single quotes, no trailing comma, printWidth 120.                                                                        |
 | `npm run icons`  | Regenerates `public/icons/` from `scripts/make-icons.mjs`.                                                                                   |
