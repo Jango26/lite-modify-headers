@@ -100,8 +100,8 @@ function StatusLine({started, items}: {started: boolean; items: ConfigItem[]}) {
     return (
         <div className="flex items-center justify-between border-y border-border bg-surface px-4 py-2.5 font-mono text-[13px] text-muted">
             <span className="flex items-center gap-2">
-                <span className={`size-2 flex-none rounded-full ${started ? 'bg-running' : 'bg-faint'}`} />
-                <span className={started ? 'text-running' : undefined}>{label}</span>
+                <span className={`size-2 flex-none rounded-full ${started ? 'bg-running' : 'bg-paused'}`} />
+                <span className={started ? 'text-running' : 'text-paused'}>{label}</span>
             </span>
             <span>
                 {activeCount} / {rules.length} rules

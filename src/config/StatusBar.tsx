@@ -8,8 +8,8 @@ export function StatusBar({started, registeredCount}: StatusBarProps) {
 
     return (
         <div className="gutter flex items-center gap-2 border-y border-border bg-surface py-[11px] font-mono text-[13px] text-muted">
-            <span className={`size-2 flex-none rounded-full ${started ? 'bg-running' : 'bg-faint'}`} />
-            <span className={started ? 'text-running' : undefined}>{started ? 'Running' : 'Paused'}</span>
+            <span className={`size-2 flex-none rounded-full ${started ? 'bg-running' : 'bg-paused'}`} />
+            <span className={started ? 'text-running' : 'text-paused'}>{started ? 'Running' : 'Paused'}</span>
             <span className="text-fainter">·</span>
             <span>
                 {registeredCount} dynamic {plural} registered

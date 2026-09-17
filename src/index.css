@@ -59,6 +59,11 @@
     --color-active: light-dark(#f2fbf5, #1c2a21);
     --color-running: #34a853;
     --color-running-soft: light-dark(#eaf6ee, #1e3a28);
+    /*
+     * Paused is amber rather than grey : a grey band would read as chrome, and
+     * the whole point of the band is to be noticed without being an error.
+     */
+    --color-paused: light-dark(#e8a33d, #d99a3c);
     --color-danger: light-dark(#dc2626, #f16d6d);
     --color-danger-hover: light-dark(#b91c1c, #d94b4b);
     --color-tip: light-dark(#111827, #0d0f13);
