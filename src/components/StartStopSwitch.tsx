@@ -4,13 +4,17 @@
  * the configuration page.
  *
  * The label is inside the <label>, so the word is as clickable as the switch.
+ * Its box is wide enough for the longer of the two words and the text is right
+ * aligned : "Running" and "Paused" do not measure the same, and letting the
+ * span shrink would shove whatever sits to its left on every toggle.
+ *
  * The track itself stays neutral when off — the status bar underneath is what
  * colours the paused state, and two amber signals would be one too many.
  */
 export function StartStopSwitch({started, onToggle}: {started: boolean; onToggle: () => void}) {
     return (
         <label className="flex cursor-pointer items-center gap-2.5 select-none">
-            <span className={`text-sm font-semibold ${started ? 'text-running' : 'text-paused-ink'}`}>
+            <span className={`w-16 text-right text-sm font-semibold ${started ? 'text-running' : 'text-paused-ink'}`}>
                 {started ? 'Running' : 'Paused'}
             </span>
             <input

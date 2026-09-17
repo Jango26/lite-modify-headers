@@ -27,10 +27,11 @@ Chromium（Chrome / Edge）浏览器扩展，Manifest V3，根据规则表改写
 
 只有一条改写路径：配置 → declarativeNetRequest 动态规则。
 
-- **`src/lib/config.ts`** 是纯逻辑层：类型定义、配置模型（`getDefaultConfig` / `createEmptyRule`）、1.x → 2.0 迁移（`migrateConfig`）、规则转换（`convertRulesToDynamicRules`）。**不碰任何 chrome API、不碰 DOM**，所以能直接被 Vitest 测。**改配置结构就是改这个文件。**
+- **`src/lib/config.ts`** 是纯逻辑层：类型定义、配置模型（`getDefaultConfig` / `createEmptyRule`）、1.x → 2.0 迁移（`migrateConfig`）、规则转换（`convertRulesToDynamicRules`）、导入导出的纯部分（`serializeConfig` / `parseImportedConfig`）。**不碰任何 chrome API、不碰 DOM**，所以能直接被 Vitest 测。**改配置结构就是改这个文件。**
 - **`src/lib/chrome.ts`** 是副作用层：storage 读写、图标、dNR 注册（`applyConfig`）。全部 Promise 化，可以 await。同时被配置页、popup 和 service worker 共用，**所以不能假设 window / DOM 存在**——错误通过返回值上报（`applyConfig` 返回错误字符串或 `null`），而不是 `alert`。
+- **`src/lib/file.ts`** 是导入导出的 DOM 那一半（下载 / 文件选择器）。单独一个文件，是为了让 `config.ts` 保持零 DOM 依赖。
 - **`src/config/`** 是配置页（`options_ui`，`open_in_tab: true`）。状态全在 `useConfig.ts` 这个 hook 里，`config.rules` 是唯一状态源；每次编辑都 `commit()`（存储 + 重新注册），**没有保存按钮**。
-- **`src/menu/`** 是工具栏弹窗，只有 Start/Stop 和打开配置页。
+- **`src/menu/`** 是工具栏弹窗：Start/Stop、逐条开关规则、打开配置页。
 - **`src/service-worker.ts`** 只在 `onStartup` / `onInstalled` 时重新注册规则（配置可能在扩展停用期间被改过）。
 - **`public/icons/`** 里的图标会被原样拷到 `dist/`。**必须放在 `public/`**：`applyConfig` 在运行时切换绿色图标，而 crxjs 只会打包 manifest 里静态引用到的那两个。
 
@@ -65,6 +66,16 @@ Chromium（Chrome / Edge）浏览器扩展，Manifest V3，根据规则表改写
 
 旧配置由 `migrateConfig` 迁移，按 `items` / `rules` / `headers` 字段判断来源：3.0 只缺 `id`，逐项补上；2.0 只是把每条 rule 包成 `{kind: 'rule'}`；1.x 额外做 `add`/`modify` → `set`、丢弃 cookie 动作（MV3 无法逐条改 cookie）、`url_contains` 仅在原来开了 `use_url_contains` 时才转为 `url_filter`。`loadState` 会返回 `migrated` 标记，配置页据此立刻落盘，避免每次加载都重跑迁移。
 
+### 导入 / 导出
+
+配置页顶栏两个箭头图标（`src/components/ConfigTransfer.tsx`）。导出 = `serializeConfig`（4 空格缩进，便于手写和 diff）+ `downloadJson`；导入 = `pickTextFile` + `parseImportedConfig`。
+
+`parseImportedConfig` 返回 `{ok: true, config}` 或 `{ok: false, error}`——**不抛异常**，因为用户可以把任何文件丢进来。它做三件事：校验是对象且至少有 `items`/`rules`/`headers` 之一；**强制走一遍 `migrateConfig`**（所以老版本导出的文件能直接导入）；**重新生成所有 `id`**（手写的文件可能没有 id，复制出来的可能重复）。
+
+**导入是整体替换而不是追加**：`items` 的顺序就是优先级，合并两份配置的语义无从定义。UI 上用 `confirm()` 拦一道。
+
+下载走 `Blob` + `a[download]` 而**不是 `chrome.downloads`**：后者要多申请一个权限，而每加一个权限都会重置商店那边慢慢攒起来的信誉（新扩展本来就会被 Enhanced Safe Browsing 弹「不受信任」警告）。
+
 ## 样式
 
 Tailwind v4，无 `tailwind.config.js`——设计变量写在 `src/index.css` 的 `@theme` 块里（`--color-accent`、`--color-muted` 等），用起来就是 `bg-accent` / `text-muted`。
@@ -72,6 +83,14 @@ Tailwind v4，无 `tailwind.config.js`——设计变量写在 `src/index.css` �
 主题色是绿色 `#34a853`，`--color-accent` 和 `--color-running` 用的是同一个值：图标本来就在规则生效时变绿，所以「品牌色」和「正在运行」故意是同一个信号。`scripts/make-icons.mjs` 里的 `STATES.green` 也是这个值，改的时候两处一起改。
 
 内容区宽度锁在 1160px 居中，靠自定义 `@utility gutter`（`padding-inline: max(40px, calc((100% - 1160px) / 2))`）。用 padding 而不是包一层容器，是为了让状态栏这种通栏色块的背景能铺满整个宽度。
+
+### 运行 / 暂停的视觉表达
+
+**只有状态栏那条通栏染色**：运行 `--color-running-soft`（淡绿），暂停 `--color-paused-soft`（淡黄），带 `transition-colors`。开关本身**一律中性灰**（开启才变绿）——试过让总开关在关闭时变琥珀，结果和状态栏两处黄色互相打架，而且「关」在总开关和规则行上就成了两种颜色。配色改在这里，别再往开关上加。
+
+`--color-paused-ink` 是**文字和圆点**专用的深琥珀，不是填充色。`paused-soft` 那种淡黄托不住文字，直接拿来写字会看不清。
+
+顶栏的 `Running`/`Paused` 标签 + 开关抽在 `src/components/StartStopSwitch.tsx`，配置页和 popup 共用。那个 `w-16 text-right` **不能删**：两个词宽度不等，标签会随切换伸缩，把左边的图标推得来回抖。
 
 ### 暗色主题
 
