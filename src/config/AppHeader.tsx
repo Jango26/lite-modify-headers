@@ -1,5 +1,6 @@
 import {ConfigTransfer} from '../components/ConfigTransfer';
 import {GithubLink} from '../components/GithubLink';
+import {StartStopSwitch} from '../components/StartStopSwitch';
 import {ThemeToggle} from '../components/ThemeToggle';
 import {useTheme} from '../components/useTheme';
 
@@ -21,21 +22,7 @@ export function AppHeader({started, onToggle, onImport, onExport}: AppHeaderProp
             <div className="flex items-center gap-4">
                 <ConfigTransfer onImport={onImport} onExport={onExport} size={19} />
                 <ThemeToggle theme={theme} onCycle={cycleTheme} size={19} />
-                <label
-                    className={`flex cursor-pointer items-center gap-2.5 rounded-full py-1.5 pr-2 pl-3.5 transition-colors select-none ${
-                        started ? 'bg-running-soft' : 'bg-paused-soft'
-                    }`}>
-                    <span className={`text-sm font-semibold ${started ? 'text-running' : 'text-paused-ink'}`}>
-                        {started ? 'Running' : 'Paused'}
-                    </span>
-                    <input
-                        type="checkbox"
-                        title="Start / stop applying rules"
-                        checked={started}
-                        onChange={onToggle}
-                        className="relative m-0 h-[26px] w-[48px] flex-none cursor-pointer appearance-none rounded-full bg-paused shadow-none transition-colors after:absolute after:top-0.5 after:left-0.5 after:size-[22px] after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-running checked:after:translate-x-[22px]"
-                    />
-                </label>
+                <StartStopSwitch started={started} onToggle={onToggle} />
             </div>
         </header>
     );

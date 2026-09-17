@@ -58,19 +58,20 @@
      */
     --color-active: light-dark(#f2fbf5, #1c2a21);
     --color-running: #34a853;
+    /*
+     * The status bar is the only place the running state is coloured : a tint
+     * across the full width rather than a block of colour, or the band would
+     * shout louder than the rules below it. Paused is amber rather than grey,
+     * which would read as chrome — the point is to be noticed without being an
+     * error. The switches stay neutral; their position already says on or off.
+     */
     --color-running-soft: light-dark(#eaf6ee, #1e3a28);
-    /*
-     * Paused is amber rather than grey : a grey band would read as chrome, and
-     * the whole point of the band is to be noticed without being an error.
-     */
-    --color-paused: light-dark(#e8a33d, #d99a3c);
-    /*
-     * Mirrors the running-soft / accent-ink pair : a pale fill for the pill
-     * behind the switch, and a darker shade for the label on it, which the
-     * amber itself is too light to carry.
-     */
     --color-paused-soft: light-dark(#fdf3e3, #3a2f1c);
-    --color-paused-ink: light-dark(#a1690f, #e8b968);
+    /*
+     * Text and dots, wherever the paused state is spelled out : the tint above
+     * is a fill and does not have the contrast to be read as a word.
+     */
+    --color-paused-ink: light-dark(#8c5a0b, #e8b968);
     --color-danger: light-dark(#dc2626, #f16d6d);
     --color-danger-hover: light-dark(#b91c1c, #d94b4b);
     --color-tip: light-dark(#111827, #0d0f13);

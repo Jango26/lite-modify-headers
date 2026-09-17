@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react';
 import {applyConfig, loadState, storeConfig, storeStarted} from '../lib/chrome';
 import {flattenItems, getDefaultConfig, isRuleComplete, type Config, type ConfigItem} from '../lib/config';
 import {GithubLink} from '../components/GithubLink';
+import {StartStopSwitch} from '../components/StartStopSwitch';
 import {useTheme} from '../components/useTheme';
 
 const CONFIG_PAGE = 'src/config/index.html';
@@ -83,7 +84,7 @@ function Header({started, onToggle}: {started: boolean; onToggle: () => void}) {
     return (
         <header className="flex items-center justify-between px-4 py-3.5">
             <h1 className="m-0 text-base font-bold tracking-[-0.2px]">Lite Modify Headers</h1>
-            <Toggle checked={started} title="Start / stop applying rules" onChange={onToggle} global />
+            <StartStopSwitch started={started} onToggle={onToggle} />
         </header>
     );
 }
@@ -98,10 +99,13 @@ function StatusLine({started, items}: {started: boolean; items: ConfigItem[]}) {
     const label = started ? `Running: ${activeCount} headers modified` : 'Paused: no headers modified';
 
     return (
-        <div className="flex items-center justify-between border-y border-border bg-surface px-4 py-2.5 font-mono text-[13px] text-muted">
+        <div
+            className={`flex items-center justify-between border-y border-border px-4 py-2.5 font-mono text-[13px] text-muted transition-colors ${
+                started ? 'bg-running-soft' : 'bg-paused-soft'
+            }`}>
             <span className="flex items-center gap-2">
-                <span className={`size-2 flex-none rounded-full ${started ? 'bg-running' : 'bg-paused'}`} />
-                <span className={started ? 'text-running' : 'text-paused'}>{label}</span>
+                <span className={`size-2 flex-none rounded-full ${started ? 'bg-running' : 'bg-paused-ink'}`} />
+                <span className={started ? 'text-running' : 'text-paused-ink'}>{label}</span>
             </span>
             <span>
                 {activeCount} / {rules.length} rules
@@ -147,32 +151,15 @@ function ItemLine({item, onToggle}: {item: ConfigItem; onToggle: () => void}) {
     );
 }
 
-interface ToggleProps {
-    checked: boolean;
-    title: string;
-    onChange: () => void;
-    /*
-     * The start/stop switch, as opposed to the per-item ones. It is bigger, and
-     * it turns amber when off : a paused extension is a state worth noticing,
-     * whereas a single rule left off is just how the list is arranged.
-     */
-    global?: boolean;
-}
-
-function Toggle({checked, title, onChange, global}: ToggleProps) {
-    const size = global
-        ? 'h-[26px] w-[48px] after:size-[22px] checked:after:translate-x-[22px]'
-        : 'h-[22px] w-[42px] after:size-[18px] checked:after:translate-x-5';
-    const track =
-        global && !checked ? 'bg-paused shadow-none' : 'bg-border shadow-[inset_0_0_0_1px_var(--color-fainter)]';
-
+/* Activates a single item. The start/stop switch is StartStopSwitch. */
+function Toggle({checked, title, onChange}: {checked: boolean; title: string; onChange: () => void}) {
     return (
         <input
             type="checkbox"
             title={title}
             checked={checked}
             onChange={onChange}
-            className={`relative m-0 flex-none cursor-pointer appearance-none rounded-full transition-colors after:absolute after:top-0.5 after:left-0.5 after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-accent checked:shadow-none ${track} ${size}`}
+            className="relative m-0 h-[22px] w-[42px] flex-none cursor-pointer appearance-none rounded-full bg-border shadow-[inset_0_0_0_1px_var(--color-fainter)] transition-colors after:absolute after:top-0.5 after:left-0.5 after:size-[18px] after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-accent checked:shadow-none checked:after:translate-x-5"
         />
     );
 }
