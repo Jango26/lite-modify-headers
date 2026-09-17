@@ -276,6 +276,39 @@ export function migrateConfig(stored: Config | LegacyConfig): Config {
     return getDefaultConfig();
 }
 
+/** IMPORT / EXPORT **/
+
+export type ImportResult = {ok: true; config: Config} | {ok: false; error: string};
+
+/** Indented so an exported file stays readable and diffable by hand. */
+export function serializeConfig(config: Config): string {
+    return JSON.stringify(config, null, 4);
+}
+
+/*
+ * Reads a configuration file chosen by the user. Anything can be dropped in
+ * there, so every failure comes back as a message instead of an exception.
+ * Ids are always regenerated : a hand written file may carry none, and a file
+ * copied from another one may repeat them.
+ */
+export function parseImportedConfig(text: string): ImportResult {
+    let parsed: unknown;
+    try {
+        parsed = JSON.parse(text);
+    } catch {
+        return {ok: false, error: 'Import failed : this file is not valid JSON.'};
+    }
+
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed))
+        return {ok: false, error: 'Import failed : this file does not hold a configuration.'};
+
+    const candidate = parsed as LegacyConfig;
+    if (!candidate.items && !candidate.rules && !candidate.headers)
+        return {ok: false, error: 'Import failed : no rules found in this file.'};
+
+    return {ok: true, config: migrateConfig({...candidate, format_version: ''})};
+}
+
 /** RULE CONVERSION TO declarativeNetRequest **/
 
 /*

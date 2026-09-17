@@ -2,6 +2,7 @@
 
 import {describe, expect, it} from 'vitest';
 import {
+    CONFIG_FORMAT_VERSION,
     convertItemsToDynamicRules,
     convertRulesToDynamicRules,
     createEmptyGroup,
@@ -12,6 +13,8 @@ import {
     flattenItems,
     getDefaultConfig,
     migrateConfig,
+    parseImportedConfig,
+    serializeConfig,
     type GroupHeader,
     type GroupItem,
     type Rule,
@@ -288,6 +291,53 @@ describe('Groups', () => {
         it('skips headers left blank inside a group', () => {
             const converted = convertItemsToDynamicRules([group({headers: [header({header_name: '  '}), header()]})]);
             expect(converted.length).toEqual(1);
+        });
+    });
+
+    describe('import / export', () => {
+        /* Every successful case asserts on the configuration, not on the wrapper. */
+        function imported(text: string) {
+            const result = parseImportedConfig(text);
+            if (!result.ok) throw new Error(result.error);
+            return result.config;
+        }
+
+        it('exports an indented, re-importable file', () => {
+            const text = serializeConfig(getDefaultConfig());
+            expect(text).toContain('\n    ');
+            expect(imported(text).items.length).toEqual(getDefaultConfig().items.length);
+        });
+
+        it('rejects a file that is not JSON', () => {
+            expect(parseImportedConfig('not json').ok).toEqual(false);
+        });
+
+        it('rejects JSON that is not a configuration object', () => {
+            expect(parseImportedConfig('[1, 2]').ok).toEqual(false);
+            expect(parseImportedConfig('{"theme": "dark"}').ok).toEqual(false);
+        });
+
+        it('migrates an imported legacy file', () => {
+            const config = imported(
+                JSON.stringify({
+                    format_version: '1.1',
+                    headers: [{status: 'on', apply_on: 'req', action: 'add', header_name: 'a', header_value: '1'}]
+                })
+            );
+            expect(config.format_version).toEqual(CONFIG_FORMAT_VERSION);
+            expect((config.items[0] as RuleItem).action).toEqual('set');
+        });
+
+        it('gives every imported item a fresh id', () => {
+            const config = imported(
+                JSON.stringify({
+                    items: [
+                        {...createEmptyRuleItem(), id: 'same'},
+                        {...createEmptyRuleItem(), id: 'same'}
+                    ]
+                })
+            );
+            expect(new Set(config.items.map((item) => item.id)).size).toEqual(2);
         });
     });
 });

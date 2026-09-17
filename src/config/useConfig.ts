@@ -6,6 +6,8 @@ import {
     createEmptyRuleItem,
     getDefaultConfig,
     newId,
+    parseImportedConfig,
+    serializeConfig,
     type Config,
     type ConfigItem,
     type GroupHeader,
@@ -13,6 +15,7 @@ import {
     type Rule,
     type RuleItem
 } from '../lib/config';
+import {downloadJson, pickTextFile} from '../lib/file';
 
 /*
  * Holds the whole configuration page state. Every edition saves and
@@ -224,6 +227,26 @@ export function useConfig() {
         [commit, config.items, withItems]
     );
 
+    const exportConfig = useCallback(() => {
+        downloadJson(serializeConfig(config), 'lite-modify-headers');
+    }, [config]);
+
+    /*
+     * An import replaces the whole list : the order of the items is what sets
+     * their priority, so merging two files would give an arbitrary result.
+     */
+    const importConfig = useCallback(async () => {
+        const text = await pickTextFile('application/json,.json');
+        if (text === null) return;
+
+        const result = parseImportedConfig(text);
+        if (!result.ok) return setError(result.error);
+        if (!confirm('Importing replaces every current rule. Continue ?')) return;
+
+        setError(null);
+        await commit(result.config);
+    }, [commit]);
+
     return {
         config,
         started,
@@ -241,6 +264,8 @@ export function useConfig() {
         removeItem,
         duplicateItem,
         moveItem,
+        exportConfig,
+        importConfig,
         flashed,
         clearFlashed: useCallback(() => setFlashed(null), [])
     };

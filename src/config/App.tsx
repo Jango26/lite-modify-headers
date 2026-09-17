@@ -51,11 +51,22 @@ function UrlFilterHint() {
 }
 
 export function App() {
-    const {config, started, registeredCount, error, toggleStarted, addRule, addGroup, ...edit} = useConfig();
+    const {
+        config,
+        started,
+        registeredCount,
+        error,
+        toggleStarted,
+        addRule,
+        addGroup,
+        exportConfig,
+        importConfig,
+        ...edit
+    } = useConfig();
 
     return (
         <>
-            <AppHeader started={started} onToggle={toggleStarted} />
+            <AppHeader started={started} onToggle={toggleStarted} onImport={importConfig} onExport={exportConfig} />
             <StatusBar started={started} registeredCount={registeredCount} />
 
             {error && <p className="gutter mt-4 mb-0 font-mono text-[13px] text-danger">{error}</p>}
@@ -117,7 +128,15 @@ export function App() {
 
 type EditHandlers = Omit<
     ReturnType<typeof useConfig>,
-    'config' | 'started' | 'registeredCount' | 'error' | 'toggleStarted' | 'addRule' | 'addGroup'
+    | 'config'
+    | 'started'
+    | 'registeredCount'
+    | 'error'
+    | 'toggleStarted'
+    | 'addRule'
+    | 'addGroup'
+    | 'exportConfig'
+    | 'importConfig'
 >;
 
 interface ItemRowProps {
