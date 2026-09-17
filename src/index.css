@@ -64,6 +64,13 @@
      * the whole point of the band is to be noticed without being an error.
      */
     --color-paused: light-dark(#e8a33d, #d99a3c);
+    /*
+     * Mirrors the running-soft / accent-ink pair : a pale fill for the pill
+     * behind the switch, and a darker shade for the label on it, which the
+     * amber itself is too light to carry.
+     */
+    --color-paused-soft: light-dark(#fdf3e3, #3a2f1c);
+    --color-paused-ink: light-dark(#a1690f, #e8b968);
     --color-danger: light-dark(#dc2626, #f16d6d);
     --color-danger-hover: light-dark(#b91c1c, #d94b4b);
     --color-tip: light-dark(#111827, #0d0f13);

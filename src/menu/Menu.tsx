@@ -83,7 +83,7 @@ function Header({started, onToggle}: {started: boolean; onToggle: () => void}) {
     return (
         <header className="flex items-center justify-between px-4 py-3.5">
             <h1 className="m-0 text-base font-bold tracking-[-0.2px]">Lite Modify Headers</h1>
-            <Toggle checked={started} title="Start / stop applying rules" onChange={onToggle} large />
+            <Toggle checked={started} title="Start / stop applying rules" onChange={onToggle} global />
         </header>
     );
 }
@@ -151,13 +151,20 @@ interface ToggleProps {
     checked: boolean;
     title: string;
     onChange: () => void;
-    large?: boolean;
+    /*
+     * The start/stop switch, as opposed to the per-item ones. It is bigger, and
+     * it turns amber when off : a paused extension is a state worth noticing,
+     * whereas a single rule left off is just how the list is arranged.
+     */
+    global?: boolean;
 }
 
-function Toggle({checked, title, onChange, large}: ToggleProps) {
-    const size = large
+function Toggle({checked, title, onChange, global}: ToggleProps) {
+    const size = global
         ? 'h-[26px] w-[48px] after:size-[22px] checked:after:translate-x-[22px]'
         : 'h-[22px] w-[42px] after:size-[18px] checked:after:translate-x-5';
+    const track =
+        global && !checked ? 'bg-paused shadow-none' : 'bg-border shadow-[inset_0_0_0_1px_var(--color-fainter)]';
 
     return (
         <input
@@ -165,7 +172,7 @@ function Toggle({checked, title, onChange, large}: ToggleProps) {
             title={title}
             checked={checked}
             onChange={onChange}
-            className={`relative m-0 flex-none cursor-pointer appearance-none rounded-full bg-border shadow-[inset_0_0_0_1px_var(--color-fainter)] transition-colors after:absolute after:top-0.5 after:left-0.5 after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-accent checked:shadow-none ${size}`}
+            className={`relative m-0 flex-none cursor-pointer appearance-none rounded-full transition-colors after:absolute after:top-0.5 after:left-0.5 after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-accent checked:shadow-none ${track} ${size}`}
         />
     );
 }
