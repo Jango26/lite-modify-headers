@@ -2,7 +2,7 @@
     "description": "Rewrite HTTP request and response headers from a local rules table",
     "manifest_version": 3,
     "name": "Lite Modify Headers",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "homepage_url": "https://github.com/Jango26/lite-modify-headers",
     "icons": {
         "16": "icons/m-16.png",
