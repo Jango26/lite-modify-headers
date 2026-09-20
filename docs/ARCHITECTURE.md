@@ -25,6 +25,19 @@ Load the unpacked extension from **`dist/`**, not the repository root.
 
 Stable Google Chrome **disables `--load-extension`** (the log shows `--load-extension is not allowed in Google Chrome, ignoring.`), so pointing puppeteer at `/Applications/Google Chrome.app` silently loads nothing. Use Chrome for Testing (`~/.cache/puppeteer/chrome/mac_arm-*/`) or Edge for end-to-end runs.
 
+### A fixed-size window for screenshots
+
+Store listings and docs want consistently sized shots. Launch a throwaway Chrome profile at an exact window size:
+
+```sh
+open -na "Google Chrome" --args \
+    --user-data-dir=/tmp/chrome-1280x800 \
+    --window-size=1280,800 \
+    --window-position=100,100
+```
+
+`--user-data-dir` is what makes `-n` actually open a second instance instead of focusing your existing one — and it keeps your real profile's extensions and tabs out of the frame. The window size only applies on a fresh profile directory; delete it to resize.
+
 ## Layout
 
 There is exactly one rewrite path: configuration → declarativeNetRequest dynamic rules.
