@@ -62,6 +62,28 @@ describe('Rule conversion', () => {
             expect(converted[0].condition.regexFilter).toEqual('includeDescendants');
         });
 
+        it('turns one filter per line into one rule each', () => {
+            const converted = convertRulesToDynamicRules([rule({url_filter: 'a.example.com\nb.example.com'})]);
+            expect(converted).toHaveLength(2);
+            expect(converted[0].condition.urlFilter).toEqual('a.example.com');
+            expect(converted[1].condition.urlFilter).toEqual('b.example.com');
+        });
+
+        it('keeps the multi filter rules ahead of the rules below them', () => {
+            const converted = convertRulesToDynamicRules([
+                rule({url_filter: 'a.example.com\nb.example.com'}),
+                rule({url_filter: 'c.example.com'})
+            ]);
+            expect(converted.map((entry) => entry.priority)).toEqual([3, 2, 1]);
+            expect(converted[2].condition.urlFilter).toEqual('c.example.com');
+        });
+
+        it('ignores blank lines between filters', () => {
+            const converted = convertRulesToDynamicRules([rule({url_filter: '\na.example.com\n\n  \n'})]);
+            expect(converted).toHaveLength(1);
+            expect(converted[0].condition.urlFilter).toEqual('a.example.com');
+        });
+
         it('treats a lone slash as a substring, not a regex', () => {
             const converted = convertRulesToDynamicRules([rule({url_filter: '/'})]);
             expect(converted[0].condition.urlFilter).toEqual('/');

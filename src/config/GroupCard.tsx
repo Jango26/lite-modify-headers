@@ -1,5 +1,6 @@
 import type {GroupHeader, GroupHeaderAction, GroupItem, RuleTarget} from '../lib/config';
 import {CopyButton, DeleteButton, FIELD, INPUT, MoveButtons, Select} from './fields';
+import {UrlFilterField} from './UrlFilterField';
 
 const GROUP_ACTION_LABELS: [GroupHeaderAction, string][] = [
     ['set', 'Set'],
@@ -73,12 +74,11 @@ export function GroupCard({
                 />
                 <label className="flex min-w-0 flex-1 items-center gap-2">
                     <span className="flex-none text-[11px] font-semibold tracking-[0.08em] text-muted">URL FILTER</span>
-                    <input
-                        type="text"
-                        className={`${INPUT} w-full`}
-                        placeholder="all URLs"
+                    <UrlFilterField
+                        label="group"
                         value={group.url_filter}
-                        onChange={(event) => onChange({url_filter: event.target.value})}
+                        placeholder="all URLs"
+                        onChange={(url_filter) => onChange({url_filter})}
                     />
                 </label>
                 <MoveButtons isFirst={isFirst} isLast={isLast} onMove={onMove} label="group" />

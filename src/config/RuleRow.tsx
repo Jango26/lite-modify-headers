@@ -1,5 +1,6 @@
 import type {Rule, RuleAction, RuleTarget} from '../lib/config';
 import {CopyButton, DeleteButton, FIELD, INPUT, MoveButtons, Select} from './fields';
+import {UrlFilterField} from './UrlFilterField';
 
 const ACTION_LABELS: [RuleAction, string][] = [
     ['set', 'Set'],
@@ -85,12 +86,11 @@ export function RuleRow({rule, isFirst, isLast, onChange, onMove, onCopy, onRemo
                 />
             </Cell>
             <Cell>
-                <input
-                    type="text"
-                    className={`${INPUT} w-full`}
-                    placeholder={rule.action === 'block' ? 'required for block' : 'all URLs'}
+                <UrlFilterField
+                    label="rule"
                     value={rule.url_filter}
-                    onChange={(event) => onChange({url_filter: event.target.value})}
+                    placeholder={rule.action === 'block' ? 'required for block' : 'all URLs'}
+                    onChange={(url_filter) => onChange({url_filter})}
                 />
             </Cell>
             <Cell>

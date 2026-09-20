@@ -3,14 +3,8 @@ import {AppHeader} from './AppHeader';
 import {GroupCard} from './GroupCard';
 import {RuleRow} from './RuleRow';
 import {StatusBar} from './StatusBar';
+import {UrlFilterHint} from './UrlFilterField';
 import {useConfig} from './useConfig';
-
-const URL_FILTER_HINT = [
-    ['empty', 'matches every URL'],
-    ['example.com/api', 'substring match'],
-    ['/^https:\\/\\/.*\\.dev\\//', 'regex — wrap in /.../'],
-    ['||example.com', 'Chrome pattern — | anchors, * wildcard']
-];
 
 const COLUMNS: [string, string, boolean?][] = [
     ['ON', 'w-[70px]'],
@@ -24,31 +18,6 @@ const COLUMNS: [string, string, boolean?][] = [
     ['', 'w-10'],
     ['', 'w-10']
 ];
-
-/*
- * The url filter syntax is not guessable, so the header carries its own
- * cheat sheet rather than sending the user to the README.
- */
-function UrlFilterHint() {
-    return (
-        <span className="group relative ml-1.5 inline-block align-middle">
-            <span className="flex size-[15px] cursor-help items-center justify-center rounded-full bg-border text-[10px] font-bold text-muted">
-                ?
-            </span>
-            <span className="pointer-events-none absolute top-[22px] left-0 z-10 hidden w-[330px] rounded-lg bg-tip p-3 text-left font-normal tracking-normal shadow-[0_4px_16px_rgba(0,0,0,0.2)] group-hover:block">
-                {URL_FILTER_HINT.map(([syntax, meaning]) => (
-                    <span key={syntax} className="mb-1.5 block last:mb-0">
-                        <code className="font-mono text-[11px] text-tip-ink">{syntax}</code>
-                        <span className="ml-1.5 text-[11px] text-tip-muted normal-case">{meaning}</span>
-                    </span>
-                ))}
-                <span className="mt-2 block border-t border-tip-border pt-2 text-[11px] text-tip-muted normal-case">
-                    Block rules require a filter.
-                </span>
-            </span>
-        </span>
-    );
-}
 
 export function App() {
     const {
@@ -115,7 +84,8 @@ export function App() {
                     + Add group
                 </button>
                 <p className="m-0 leading-relaxed text-muted">
-                    Blank URL filter applies to all URLs · regex supported (wrap in /.../) · block rules need a filter
+                    Blank URL filter applies to all URLs · regex supported (wrap in /.../) · one filter per line · block
+                    rules need a filter
                     <br />
                     A group shares one name and one URL filter across all of its headers.
                     <br />

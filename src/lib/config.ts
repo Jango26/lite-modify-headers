@@ -362,16 +362,34 @@ export function isRuleComplete(rule: Rule): boolean {
 }
 
 /*
+ * One rule may carry several url filters, one per line, because a
+ * declarativeNetRequest condition only holds a single filter. Each line
+ * becomes its own dynamic rule.
+ */
+export function parseUrlFilters(url_filter: string): string[] {
+    const lines = url_filter
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line) => line !== '');
+    /* No filter at all still means one rule, matching every URL. */
+    return lines.length === 0 ? [''] : lines;
+}
+
+/*
  * Rules apply top to bottom : the first one to change a header wins, so the
  * declarativeNetRequest priority decreases as the line number increases.
  * Groups are expanded beforehand, so a group takes as many priority slots as
- * it has headers, right where it sits in the list.
+ * it has headers, right where it sits in the list. A rule listing several url
+ * filters likewise takes one slot per filter.
  */
 export function convertRulesToDynamicRules(rules: Rule[]): chrome.declarativeNetRequest.Rule[] {
-    const applicable = rules.filter(isRuleComplete);
-    return applicable.map((rule, index) => ({
+    const expanded = rules
+        .filter(isRuleComplete)
+        .flatMap((rule) => parseUrlFilters(rule.url_filter).map((url_filter) => ({...rule, url_filter})));
+
+    return expanded.map((rule, index) => ({
         id: index + 1,
-        priority: applicable.length - index,
+        priority: expanded.length - index,
         condition: buildRuleCondition(rule.url_filter),
         action:
             rule.action === 'block'
