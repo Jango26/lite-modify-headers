@@ -115,9 +115,15 @@ function UrlFilterDialog({value, label, onCancel, onSave}: UrlFilterDialogProps)
     const [draft, setDraft] = useState(value);
     const field = useRef<HTMLTextAreaElement>(null);
 
+    /*
+     * Focus lands the caret at the start, which is the wrong end when the
+     * point is usually to append another filter.
+     */
     useEffect(() => {
-        field.current?.focus();
-        field.current?.select();
+        const field_element = field.current;
+        if (!field_element) return;
+        field_element.focus();
+        field_element.setSelectionRange(field_element.value.length, field_element.value.length);
     }, []);
 
     useEffect(() => {
@@ -148,12 +154,12 @@ function UrlFilterDialog({value, label, onCancel, onSave}: UrlFilterDialogProps)
             onMouseDown={(event) => {
                 if (event.target === event.currentTarget) onCancel();
             }}>
-            <div className="w-[560px] max-w-full rounded-xl border border-border bg-card p-5 shadow-[0_16px_48px_rgba(0,0,0,0.24)]">
+            <div className="w-[660px] max-w-full rounded-xl border border-border bg-card p-5 shadow-[0_16px_48px_rgba(0,0,0,0.24)]">
                 <p className="m-0 mb-3 text-[13px] font-semibold text-muted">URL filter for this {label}</p>
                 <textarea
                     ref={field}
-                    rows={4}
-                    className="w-full resize-y rounded-md border border-border bg-card p-2.5 font-mono text-[13px] break-all focus:border-accent focus:outline-none"
+                    rows={8}
+                    className="w-full resize-none rounded-md border border-border bg-card p-2.5 font-mono text-[13px] break-all focus:border-accent focus:outline-none"
                     placeholder="all URLs"
                     value={draft}
                     onChange={(event) => setDraft(event.target.value)}
