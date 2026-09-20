@@ -77,6 +77,12 @@ function exceedsBrowserRuleLimit(rules: chrome.declarativeNetRequest.Rule[]): bo
 export const TOO_MANY_RULES_ERROR = 'Too many rules for the browser. Please disable some rules.';
 
 /*
+ * The browser validates the whole batch : one malformed rule rejects every
+ * other rule with it, so a rejection always means nothing got registered.
+ */
+export const REJECTED_RULES_ERROR = 'The browser refused the rules, none of them are active.';
+
+/*
  * Register the configuration as dynamic rules. Always clears the previous
  * rules first, so this is also the way to apply an edited configuration.
  * Resolves with an error message when the rules could not be registered.
@@ -97,7 +103,15 @@ export async function applyConfig(config: Config, started: boolean): Promise<str
         return TOO_MANY_RULES_ERROR;
     }
 
-    await chrome.declarativeNetRequest.updateDynamicRules({addRules: rules});
+    try {
+        await chrome.declarativeNetRequest.updateDynamicRules({addRules: rules});
+    } catch (error) {
+        const reason = error instanceof Error ? error.message : String(error);
+        console.log(REJECTED_RULES_ERROR + ' ' + reason);
+        setBadge('!', RED);
+        return REJECTED_RULES_ERROR + ' ' + reason;
+    }
+
     setBadge(rules.length === 0 ? '' : String(rules.length), GREEN);
     return null;
 }

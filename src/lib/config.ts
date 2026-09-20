@@ -314,6 +314,11 @@ export function parseImportedConfig(text: string): ImportResult {
 /*
  * A url filter wrapped in slashes (/.../) is a regular expression,
  * anything else is a declarativeNetRequest url substring filter.
+ *
+ * Substring filters are lowercased before they reach the browser : it rejects
+ * a urlFilter holding a non ASCII lowercase character, and rejecting one rule
+ * rejects the whole batch. Matching is case insensitive anyway, so this costs
+ * nothing and spares everyone a silently dead rule table.
  */
 function isRegexFilter(url_filter: string): boolean {
     const trimmed = url_filter.trim();
@@ -329,7 +334,7 @@ function buildRuleCondition(url_filter: string): chrome.declarativeNetRequest.Ru
     const trimmed = url_filter.trim();
     if (trimmed === '') return condition;
     if (isRegexFilter(trimmed)) condition.regexFilter = extractRegexSource(trimmed);
-    else condition.urlFilter = trimmed;
+    else condition.urlFilter = trimmed.toLowerCase();
     return condition;
 }
 

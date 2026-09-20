@@ -46,10 +46,20 @@ describe('Rule conversion', () => {
             expect(converted[0].condition.urlFilter).toEqual('example.com');
         });
 
+        it('lowercases a substring filter, which the browser demands', () => {
+            const converted = convertRulesToDynamicRules([rule({url_filter: 'api/v1?includeDescendants=true'})]);
+            expect(converted[0].condition.urlFilter).toEqual('api/v1?includedescendants=true');
+        });
+
         it('uses a regex filter when wrapped in slashes', () => {
             const converted = convertRulesToDynamicRules([rule({url_filter: '/api\\/v[12]/'})]);
             expect(converted[0].condition.regexFilter).toEqual('api\\/v[12]');
             expect(converted[0].condition.urlFilter).toBeUndefined();
+        });
+
+        it('leaves the case of a regex filter alone', () => {
+            const converted = convertRulesToDynamicRules([rule({url_filter: '/includeDescendants/'})]);
+            expect(converted[0].condition.regexFilter).toEqual('includeDescendants');
         });
 
         it('treats a lone slash as a substring, not a regex', () => {
