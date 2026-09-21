@@ -233,6 +233,22 @@ export function useConfig() {
         [commit, config.items, withItems]
     );
 
+    /*
+     * Reorders a header inside its group. Drag and the (future) move buttons
+     * both go through here so the priority stays array order, same as items.
+     */
+    const moveHeader = useCallback(
+        (index: number, from: number, to: number) => {
+            const target = config.items[index] as GroupItem;
+            if (to < 0 || to >= target.headers.length) return;
+            const headers = [...target.headers];
+            const [moved] = headers.splice(from, 1);
+            headers.splice(to, 0, moved);
+            return withHeaders(index, headers);
+        },
+        [config.items, withHeaders]
+    );
+
     const exportConfig = useCallback(() => {
         downloadJson(serializeConfig(config), 'lite-modify-headers');
     }, [config]);
@@ -270,6 +286,7 @@ export function useConfig() {
         removeItem,
         duplicateItem,
         moveItem,
+        moveHeader,
         exportConfig,
         importConfig,
         flashed,

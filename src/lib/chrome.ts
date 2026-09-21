@@ -5,7 +5,7 @@
  * never assume a window or a DOM.
  */
 
-import {convertItemsToDynamicRules, getDefaultConfig, migrateConfig, type Config} from './config';
+import {convertItemsToDynamicRules, countActiveUnits, getDefaultConfig, migrateConfig, type Config} from './config';
 
 let debug_mode = false;
 
@@ -112,7 +112,10 @@ export async function applyConfig(config: Config, started: boolean): Promise<str
         return REJECTED_RULES_ERROR + ' ' + reason;
     }
 
-    setBadge(rules.length === 0 ? '' : String(rules.length), GREEN);
+    setBadge((() => {
+        const units = countActiveUnits(config.items);
+        return units === 0 ? '' : String(units);
+    })(), GREEN);
     return null;
 }
 

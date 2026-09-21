@@ -1,5 +1,18 @@
+import {
+    DndContext,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    closestCenter,
+    type DragEndEvent,
+    type DraggableAttributes
+} from '@dnd-kit/core';
+import type {SyntheticListenerMap} from '@dnd-kit/core/dist/hooks/utilities';
+import {SortableContext, verticalListSortingStrategy, useSortable} from '@dnd-kit/sortable';
+import {CSS} from '@dnd-kit/utilities';
 import type {GroupHeader, GroupHeaderAction, GroupItem, RuleTarget} from '../lib/config';
-import {CopyButton, DeleteButton, FIELD, INPUT, MoveButtons, Select} from './fields';
+import {DragHandle} from './DragHandle';
+import {CopyButton, DeleteButton, FIELD, INPUT, Select} from './fields';
 import {UrlFilterField} from './UrlFilterField';
 
 const GROUP_ACTION_LABELS: [GroupHeaderAction, string][] = [
@@ -14,16 +27,17 @@ const TYPE_LABELS: [RuleTarget, string][] = [
 
 interface GroupCardProps {
     group: GroupItem;
-    isFirst: boolean;
-    isLast: boolean;
     onChange: (changes: Partial<Omit<GroupItem, 'kind' | 'headers'>>) => void;
     onHeaderChange: (headerIndex: number, changes: Partial<GroupHeader>) => void;
+    onHeaderMove: (from: number, to: number) => void;
     onAddHeader: () => void;
     onRemoveHeader: (headerIndex: number) => void;
     onCopyHeader: (headerIndex: number) => void;
-    onMove: (offset: number) => void;
     onCopy: () => void;
     onRemove: () => void;
+    /* dnd-kit listeners for the whole-group drag, handed down from ItemRow. */
+    dragListeners?: SyntheticListenerMap;
+    dragAttributes?: DraggableAttributes;
     /* Highlights the card, or one of its header rows, right after a copy. */
     flash: boolean;
     flashedHeader: string | null;
@@ -36,20 +50,32 @@ interface GroupCardProps {
  */
 export function GroupCard({
     group,
-    isFirst,
-    isLast,
     onChange,
     onHeaderChange,
+    onHeaderMove,
     onAddHeader,
     onRemoveHeader,
     onCopyHeader,
-    onMove,
     onCopy,
     onRemove,
+    dragListeners,
+    dragAttributes,
     flash,
     flashedHeader,
     onFlashEnd
 }: GroupCardProps) {
+    const sensors = useSensors(useSensor(PointerSensor, {activationConstraint: {distance: 4}}));
+
+    const onHeaderDragEnd = (event: DragEndEvent) => {
+        const {active, over} = event;
+        if (!over || active.id === over.id) return;
+        const ids = group.headers.map((header) => header.id);
+        const from = ids.indexOf(String(active.id));
+        const to = ids.indexOf(String(over.id));
+        if (from === -1 || to === -1) return;
+        onHeaderMove(from, to);
+    };
+
     return (
         <div
             className={`rounded-lg ${group.status === 'on' ? 'bg-active' : 'bg-card'} shadow-[0_0_0_1px_var(--color-border)] ${flash ? 'flash-new' : ''}`}
@@ -81,24 +107,30 @@ export function GroupCard({
                         onChange={(url_filter) => onChange({url_filter})}
                     />
                 </label>
-                <MoveButtons isFirst={isFirst} isLast={isLast} onMove={onMove} label="group" />
                 <CopyButton label="group" onCopy={onCopy} />
+                {dragListeners && <DragHandle listeners={dragListeners} attributes={dragAttributes} />}
                 <DeleteButton label="group" onConfirm={onRemove} />
             </div>
 
             <div className="flex flex-col gap-1.5 px-[18px] py-2.5">
-                {group.headers.map((header, headerIndex) => (
-                    <HeaderRow
-                        key={header.id}
-                        header={header}
-                        groupActive={group.status === 'on'}
-                        onChange={(changes) => onHeaderChange(headerIndex, changes)}
-                        onCopy={() => onCopyHeader(headerIndex)}
-                        onRemove={() => onRemoveHeader(headerIndex)}
-                        flash={flashedHeader === header.id}
-                        onFlashEnd={onFlashEnd}
-                    />
-                ))}
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onHeaderDragEnd}>
+                    <SortableContext
+                        items={group.headers.map((header) => header.id)}
+                        strategy={verticalListSortingStrategy}>
+                        {group.headers.map((header, headerIndex) => (
+                            <HeaderRow
+                                key={header.id}
+                                header={header}
+                                groupActive={group.status === 'on'}
+                                onChange={(changes) => onHeaderChange(headerIndex, changes)}
+                                onCopy={() => onCopyHeader(headerIndex)}
+                                onRemove={() => onRemoveHeader(headerIndex)}
+                                flash={flashedHeader === header.id}
+                                onFlashEnd={onFlashEnd}
+                            />
+                        ))}
+                    </SortableContext>
+                </DndContext>
                 <button
                     type="button"
                     onClick={onAddHeader}
@@ -127,9 +159,16 @@ interface HeaderRowProps {
  */
 function HeaderRow({header, groupActive, onChange, onCopy, onRemove, flash, onFlashEnd}: HeaderRowProps) {
     const active = groupActive && header.status === 'on';
+    const {setNodeRef, attributes, listeners, transform, transition, isDragging} = useSortable({id: header.id});
+    const style = {
+        transform: CSS.Transform.toString(transform ? {x: transform.x, y: transform.y, scaleX: 1, scaleY: 1} : null),
+        transition
+    } as React.CSSProperties;
     return (
         <div
-            className={`flex items-center gap-2.5 rounded-md px-2 py-1.5 ${active ? 'bg-active' : 'bg-card'} ${flash ? 'flash-new' : ''}`}
+            ref={setNodeRef}
+            style={style}
+            className={`flex items-center gap-2.5 rounded-md px-2 py-1.5 ${active ? 'bg-active' : 'bg-card'} ${flash ? 'flash-new' : ''} ${isDragging ? 'opacity-50' : ''}`}
             onAnimationEnd={onFlashEnd}>
             <input
                 type="checkbox"
@@ -166,6 +205,7 @@ function HeaderRow({header, groupActive, onChange, onCopy, onRemove, flash, onFl
                 onChange={(event) => onChange({header_value: event.target.value})}
             />
             <CopyButton label="header" onCopy={onCopy} />
+            <DragHandle listeners={listeners} attributes={attributes} />
             <DeleteButton label="header" onConfirm={onRemove} />
         </div>
     );

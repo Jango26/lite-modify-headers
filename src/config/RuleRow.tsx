@@ -1,5 +1,8 @@
+import type {DraggableAttributes} from '@dnd-kit/core';
+import type {SyntheticListenerMap} from '@dnd-kit/core/dist/hooks/utilities';
 import type {Rule, RuleAction, RuleTarget} from '../lib/config';
-import {CopyButton, DeleteButton, FIELD, INPUT, MoveButtons, Select} from './fields';
+import {DragHandle} from './DragHandle';
+import {CopyButton, DeleteButton, FIELD, INPUT, Select} from './fields';
 import {UrlFilterField} from './UrlFilterField';
 
 const ACTION_LABELS: [RuleAction, string][] = [
@@ -15,23 +18,29 @@ const TYPE_LABELS: [RuleTarget, string][] = [
 
 interface RuleRowProps {
     rule: Rule;
-    isFirst: boolean;
-    isLast: boolean;
     onChange: (changes: Partial<Rule>) => void;
-    onMove: (offset: number) => void;
     onCopy: () => void;
     onRemove: () => void;
-    /* Highlights the row right after it was created as a copy. */
-    flash: boolean;
-    onFlashEnd: () => void;
+    /* dnd-kit hooks handed down from the sortable wrapper in ItemRow. */
+    dragListeners?: SyntheticListenerMap;
+    dragAttributes?: DraggableAttributes;
 }
 
-export function RuleRow({rule, isFirst, isLast, onChange, onMove, onCopy, onRemove, flash, onFlashEnd}: RuleRowProps) {
+/*
+ * Renders the row's fields in a flex strip — the wrapping card is owned by
+ * ItemRow so the dnd-kit sortable transform applies at the row level.
+ */
+export function RuleRow({
+    rule,
+    onChange,
+    onCopy,
+    onRemove,
+    dragListeners,
+    dragAttributes
+}: RuleRowProps) {
     return (
-        <tr
-            className={`rounded-lg ${rule.status === 'on' ? 'bg-active' : 'bg-card'} shadow-[0_0_0_1px_var(--color-border)] ${flash ? 'flash-new' : ''}`}
-            onAnimationEnd={onFlashEnd}>
-            <Cell first>
+        <div className="flex items-center gap-2.5 px-[18px] py-3.5">
+            <Cell className="w-[70px] flex-none justify-center">
                 <input
                     type="checkbox"
                     title="Activate / deactivate rule"
@@ -40,7 +49,7 @@ export function RuleRow({rule, isFirst, isLast, onChange, onMove, onCopy, onRemo
                     className="relative m-0 h-[22px] w-[42px] flex-none cursor-pointer appearance-none rounded-full bg-border shadow-[inset_0_0_0_1px_var(--color-fainter)] transition-colors after:absolute after:top-0.5 after:left-0.5 after:size-[18px] after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-accent checked:shadow-none checked:after:translate-x-5"
                 />
             </Cell>
-            <Cell>
+            <Cell className="w-[180px] flex-none">
                 <input
                     type="text"
                     className={`${FIELD} w-full`}
@@ -49,7 +58,7 @@ export function RuleRow({rule, isFirst, isLast, onChange, onMove, onCopy, onRemo
                     onChange={(event) => onChange({name: event.target.value})}
                 />
             </Cell>
-            <Cell>
+            <Cell className="w-[120px] flex-none">
                 <Select
                     options={TYPE_LABELS}
                     value={rule.apply_on}
@@ -57,7 +66,7 @@ export function RuleRow({rule, isFirst, isLast, onChange, onMove, onCopy, onRemo
                     className={`${FIELD} w-full cursor-pointer bg-accent-soft text-center font-mono text-accent-ink [text-align-last:center]`}
                 />
             </Cell>
-            <Cell>
+            <Cell className="w-[130px] flex-none">
                 <Select
                     options={ACTION_LABELS}
                     value={rule.action}
@@ -65,7 +74,7 @@ export function RuleRow({rule, isFirst, isLast, onChange, onMove, onCopy, onRemo
                     className={`${FIELD} w-full`}
                 />
             </Cell>
-            <Cell>
+            <Cell className="min-w-0 flex-1">
                 <input
                     type="text"
                     className={`${INPUT} w-full`}
@@ -75,7 +84,7 @@ export function RuleRow({rule, isFirst, isLast, onChange, onMove, onCopy, onRemo
                     onChange={(event) => onChange({header_name: event.target.value})}
                 />
             </Cell>
-            <Cell>
+            <Cell className="min-w-0 flex-1">
                 <input
                     type="text"
                     className={`${INPUT} w-full`}
@@ -85,7 +94,7 @@ export function RuleRow({rule, isFirst, isLast, onChange, onMove, onCopy, onRemo
                     onChange={(event) => onChange({header_value: event.target.value})}
                 />
             </Cell>
-            <Cell>
+            <Cell className="min-w-0 flex-1">
                 <UrlFilterField
                     label="rule"
                     value={rule.url_filter}
@@ -93,24 +102,20 @@ export function RuleRow({rule, isFirst, isLast, onChange, onMove, onCopy, onRemo
                     onChange={(url_filter) => onChange({url_filter})}
                 />
             </Cell>
-            <Cell>
-                <MoveButtons isFirst={isFirst} isLast={isLast} onMove={onMove} label="rule" />
-            </Cell>
-            <Cell>
+            <Cell className="flex-none">
                 <CopyButton label="rule" onCopy={onCopy} />
             </Cell>
-            <Cell last>
-                <DeleteButton label="rule" onConfirm={onRemove} />
+            <Cell className="flex-none">
+                {dragListeners && <DragHandle listeners={dragListeners} attributes={dragAttributes} />}
             </Cell>
-        </tr>
+            <Cell className="flex-none pt-[4px]">
+                <DeleteButton label="rule" onConfirm={onRemove}/>
+            </Cell>
+        </div>
     );
 }
 
-function Cell({children, first, last}: {children: React.ReactNode; first?: boolean; last?: boolean}) {
-    const rounding = [
-        'px-2.5 py-3.5 align-middle',
-        first ? 'rounded-l-lg pl-[18px]' : '',
-        last ? 'rounded-r-lg pr-[18px]' : ''
-    ].join(' ');
-    return <td className={rounding}>{children}</td>;
+/* A flex sub-cell : just aligns its content and applies the caller's width. */
+function Cell({children, className}: {children: React.ReactNode; className?: string}) {
+    return <div className={`flex items-center ${className ?? ''}`}>{children}</div>;
 }

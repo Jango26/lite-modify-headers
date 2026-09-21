@@ -195,6 +195,15 @@ export function flattenItems(items: ConfigItem[]): Rule[] {
 }
 
 /*
+ * The badge counts active units, not expanded rules : an active group is one
+ * unit regardless of how many headers it holds, and an active top-level rule
+ * is one unit. Inactive items (group off, rule off) do not count.
+ */
+export function countActiveUnits(items: ConfigItem[]): number {
+    return items.filter((item) => item.status === 'on').length;
+}
+
+/*
  * Configurations saved by version 1.x used a "headers" list with per-rule
  * "url_contains" filtering and cookie actions that Manifest V3 cannot support.
  * Version 2.0 had a flat "rules" list, without groups.

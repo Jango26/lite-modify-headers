@@ -4,6 +4,7 @@
  */
 
 import {useEffect, useRef, useState} from 'react';
+import {Copy, Trash2} from 'lucide-react';
 
 /*
  * No width here on purpose : the call site owns it. A `w-full` baked into
@@ -14,7 +15,7 @@ export const FIELD =
     'h-9 min-w-0 rounded-md border border-border bg-card px-2.5 text-[13px] focus:border-accent focus:outline-none';
 export const INPUT = `${FIELD} font-mono placeholder:text-faint disabled:bg-surface disabled:text-faint`;
 export const ICON_BTN =
-    'cursor-pointer border-none bg-transparent p-0 text-[11px] leading-none text-fainter hover:text-muted disabled:cursor-default disabled:text-disabled';
+    'cursor-pointer border-none bg-transparent p-0 text-[11px] leading-none text-faint hover:text-muted disabled:cursor-default disabled:text-disabled';
 
 interface SelectProps<T extends string> {
     options: [T, string][];
@@ -71,8 +72,8 @@ export function DeleteButton({label, onConfirm}: DeleteButtonProps) {
                 type="button"
                 title={`Delete ${label}`}
                 onClick={() => setOpen((value) => !value)}
-                className={`${ICON_BTN} text-[17px] hover:text-danger`}>
-                ✕
+                className={`${ICON_BTN} hover:text-danger`}>
+                <Trash2 size={16} aria-hidden="true" />
             </button>
             {open && (
                 <div className="absolute top-full right-0 z-10 mt-1.5 w-[184px] rounded-lg border border-border bg-card p-3 text-left shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
@@ -103,10 +104,6 @@ export function DeleteButton({label, onConfirm}: DeleteButtonProps) {
 /*
  * Duplicating is trivially undone by deleting the copy, so unlike the delete
  * button this one acts right away without a confirmation bubble.
- *
- * The glyph is inline SVG rather than a character like the neighbouring
- * buttons : the Unicode copy symbols all render as some skewed pair of squares
- * that depends on whichever font the system picks.
  */
 export function CopyButton({label, onCopy}: {label: string; onCopy: () => void}) {
     return (
@@ -115,49 +112,7 @@ export function CopyButton({label, onCopy}: {label: string; onCopy: () => void})
             title={`Duplicate ${label}`}
             onClick={onCopy}
             className={`${ICON_BTN} flex flex-none items-center justify-center hover:text-accent`}>
-            <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true">
-                <rect x="9" y="9" width="12" height="12" rx="2" />
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-            </svg>
+            <Copy size={16} aria-hidden="true" />
         </button>
-    );
-}
-
-interface MoveButtonsProps {
-    isFirst: boolean;
-    isLast: boolean;
-    onMove: (offset: number) => void;
-    label: string;
-}
-
-export function MoveButtons({isFirst, isLast, onMove, label}: MoveButtonsProps) {
-    return (
-        <div className="flex flex-none flex-col items-center gap-0.5">
-            <button
-                type="button"
-                title={`Move ${label} up`}
-                className={ICON_BTN}
-                disabled={isFirst}
-                onClick={() => onMove(-1)}>
-                ▲
-            </button>
-            <button
-                type="button"
-                title={`Move ${label} down`}
-                className={ICON_BTN}
-                disabled={isLast}
-                onClick={() => onMove(1)}>
-                ▼
-            </button>
-        </div>
     );
 }

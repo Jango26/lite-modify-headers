@@ -1,23 +1,12 @@
+import {DndContext, PointerSensor, useSensor, useSensors, closestCenter, type DragEndEvent} from '@dnd-kit/core';
+import {SortableContext, verticalListSortingStrategy, useSortable} from '@dnd-kit/sortable';
+import {CSS} from '@dnd-kit/utilities';
 import type {ConfigItem} from '../lib/config';
 import {AppHeader} from './AppHeader';
 import {GroupCard} from './GroupCard';
 import {RuleRow} from './RuleRow';
 import {StatusBar} from './StatusBar';
-import {UrlFilterHint} from './UrlFilterField';
 import {useConfig} from './useConfig';
-
-const COLUMNS: [string, string, boolean?][] = [
-    ['ON', 'w-[70px]'],
-    ['NAME', 'w-[180px]'],
-    ['TYPE', 'w-[120px]'],
-    ['ACTION', 'w-[130px]'],
-    ['HEADER', ''],
-    ['VALUE', ''],
-    ['URL FILTER', '', true],
-    ['', 'w-10'],
-    ['', 'w-10'],
-    ['', 'w-10']
-];
 
 export function App() {
     const {
@@ -33,6 +22,18 @@ export function App() {
         ...edit
     } = useConfig();
 
+    const sensors = useSensors(useSensor(PointerSensor, {activationConstraint: {distance: 4}}));
+
+    const onDragEnd = (event: DragEndEvent) => {
+        const {active, over} = event;
+        if (!over || active.id === over.id) return;
+        const ids = config.items.map((item) => item.id);
+        const from = ids.indexOf(String(active.id));
+        const to = ids.indexOf(String(over.id));
+        if (from === -1 || to === -1) return;
+        edit.moveItem(from, to);
+    };
+
     return (
         <>
             <AppHeader started={started} onToggle={toggleStarted} onImport={importConfig} onExport={exportConfig} />
@@ -41,34 +42,19 @@ export function App() {
             {error && <p className="gutter mt-4 mb-0 font-mono text-[13px] text-danger">{error}</p>}
 
             {/*
-             * Fixed layout : otherwise the group cards, which span every
-             * column, would widen the table past the content area.
+             * Items stack vertically, each one a full-width row or card. flex
+             * keeps the rule's field widths stable without a <table> while the
+             * group card simply fills the same width.
              */}
-            <table className="w-full gutter table-fixed border-separate border-spacing-y-2.5 pt-2">
-                <thead>
-                    <tr>
-                        {COLUMNS.map(([label, width, hint], index) => (
-                            <th
-                                key={index}
-                                className={`px-2.5 py-2 text-left text-[11px] font-semibold tracking-[0.08em] text-muted ${width}`}>
-                                {label}
-                                {hint && <UrlFilterHint />}
-                            </th>
+            <div className="gutter flex flex-col gap-2.5 pt-6">
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+                    <SortableContext items={config.items.map((item) => item.id)} strategy={verticalListSortingStrategy}>
+                        {config.items.map((item, index) => (
+                            <ItemRow key={item.id} item={item} index={index} edit={edit} />
                         ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {config.items.map((item, index) => (
-                        <ItemRow
-                            key={item.id}
-                            item={item}
-                            index={index}
-                            isLast={index === config.items.length - 1}
-                            edit={edit}
-                        />
-                    ))}
-                </tbody>
-            </table>
+                    </SortableContext>
+                </DndContext>
+            </div>
 
             <div className="gutter flex items-start gap-[22px] pt-4">
                 <button
@@ -112,57 +98,66 @@ type EditHandlers = Omit<
 interface ItemRowProps {
     item: ConfigItem;
     index: number;
-    isLast: boolean;
     edit: EditHandlers;
 }
 
 /*
- * A group is rendered as a card spanning the whole table instead of a row :
- * its shared name and url filter do not line up with the rule columns.
+ * ItemRow owns the sortable wrapper div so the dnd-kit transform applies at
+ * the row level for both rules and groups.
  */
-function ItemRow({item, index, isLast, edit}: ItemRowProps) {
-    const isFirst = index === 0;
-    const onMove = (offset: number) => edit.moveItem(index, index + offset);
+function ItemRow({item, index, edit}: ItemRowProps) {
     const onCopy = () => edit.duplicateItem(index);
     const onRemove = () => edit.removeItem(index);
     const flash = edit.flashed === item.id;
     const onFlashEnd = edit.clearFlashed;
 
+    const {setNodeRef, attributes, listeners, transform, transition, isDragging} = useSortable({
+        id: item.id
+    });
+    // Drop the scale component entirely : dnd-kit scales a dragged row to fit
+    // the gap left by a shorter/taller neighbour, which visually squashes or
+    // stretches the group card mid-drag.
+    const style = {
+        transform: CSS.Transform.toString(transform ? {x: transform.x, y: transform.y, scaleX: 1, scaleY: 1} : null),
+        transition
+    } as React.CSSProperties;
+
     if (item.kind === 'group')
         return (
-            <tr>
-                <td colSpan={COLUMNS.length} className="p-0">
-                    <GroupCard
-                        group={item}
-                        isFirst={isFirst}
-                        isLast={isLast}
-                        onChange={(changes) => edit.updateGroup(index, changes)}
-                        onHeaderChange={(headerIndex, changes) => edit.updateHeader(index, headerIndex, changes)}
-                        onAddHeader={() => edit.addHeader(index)}
-                        onRemoveHeader={(headerIndex) => edit.removeHeader(index, headerIndex)}
-                        onCopyHeader={(headerIndex) => edit.duplicateHeader(index, headerIndex)}
-                        onMove={onMove}
-                        onCopy={onCopy}
-                        onRemove={onRemove}
-                        flash={flash}
-                        flashedHeader={edit.flashed}
-                        onFlashEnd={onFlashEnd}
-                    />
-                </td>
-            </tr>
+            <div ref={setNodeRef} style={style} className={isDragging ? 'opacity-50' : ''}>
+                <GroupCard
+                    group={item}
+                    onChange={(changes) => edit.updateGroup(index, changes)}
+                    onHeaderChange={(headerIndex, changes) => edit.updateHeader(index, headerIndex, changes)}
+                    onHeaderMove={(from, to) => edit.moveHeader(index, from, to)}
+                    onAddHeader={() => edit.addHeader(index)}
+                    onRemoveHeader={(headerIndex) => edit.removeHeader(index, headerIndex)}
+                    onCopyHeader={(headerIndex) => edit.duplicateHeader(index, headerIndex)}
+                    dragListeners={listeners}
+                    dragAttributes={attributes}
+                    onCopy={onCopy}
+                    onRemove={onRemove}
+                    flash={flash}
+                    flashedHeader={edit.flashed}
+                    onFlashEnd={onFlashEnd}
+                />
+            </div>
         );
 
     return (
-        <RuleRow
-            rule={item}
-            isFirst={isFirst}
-            isLast={isLast}
-            onChange={(changes) => edit.updateRule(index, changes)}
-            onMove={onMove}
-            onCopy={onCopy}
-            onRemove={onRemove}
-            flash={flash}
-            onFlashEnd={onFlashEnd}
-        />
+        <div
+            ref={setNodeRef}
+            style={style}
+            className={`rounded-lg ${item.status === 'on' ? 'bg-active' : 'bg-card'} shadow-[0_0_0_1px_var(--color-border)] ${flash ? 'flash-new' : ''} ${isDragging ? 'opacity-50' : ''}`}
+            onAnimationEnd={onFlashEnd}>
+            <RuleRow
+                rule={item}
+                onChange={(changes) => edit.updateRule(index, changes)}
+                onCopy={onCopy}
+                onRemove={onRemove}
+                dragListeners={listeners}
+                dragAttributes={attributes}
+            />
+        </div>
     );
 }
