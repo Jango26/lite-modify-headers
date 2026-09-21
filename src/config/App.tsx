@@ -75,7 +75,7 @@ export function App() {
                     <br />
                     A group shares one name and one URL filter across all of its headers.
                     <br />
-                    Rules apply top to bottom — the first to change a header wins.
+                    Rules apply top to bottom — the higher a rule sits, the higher its priority; the first to change a header wins.
                 </p>
             </div>
         </>

@@ -31,7 +31,7 @@ function withoutIds<T>(value: T): T {
 
 describe('Rule conversion', () => {
     function rule(overrides: Partial<Rule> = {}): Rule {
-        return {...createEmptyRule(), header_name: 'x-test', ...overrides};
+        return {...createEmptyRule(), status: 'on', header_name: 'x-test', ...overrides};
     }
 
     describe('url filter', () => {
@@ -265,11 +265,18 @@ describe('First install samples', () => {
 
 describe('Groups', () => {
     function header(overrides: Partial<GroupHeader> = {}): GroupHeader {
-        return {...createEmptyGroupHeader(), header_name: 'x-group', ...overrides};
+        return {...createEmptyGroupHeader(), status: 'on', header_name: 'x-group', ...overrides};
     }
 
     function group(overrides: Partial<GroupItem> = {}): GroupItem {
-        return {...createEmptyGroup(), name: 'g', url_filter: 'api', headers: [header()], ...overrides};
+        return {
+            ...createEmptyGroup(),
+            status: 'on',
+            name: 'g',
+            url_filter: 'api',
+            headers: [header()],
+            ...overrides
+        };
     }
 
     describe('expansion', () => {
@@ -315,7 +322,7 @@ describe('Groups', () => {
         });
 
         it('takes as many priority slots as the group has headers', () => {
-            const trailing = {...createEmptyRuleItem(), header_name: 'trailing'};
+            const trailing = {...createEmptyRuleItem(), status: 'on' as const, header_name: 'trailing'};
             const converted = convertItemsToDynamicRules([group({headers: [header(), header()]}), trailing]);
             expect(converted.map((r) => r.priority)).toEqual([3, 2, 1]);
         });

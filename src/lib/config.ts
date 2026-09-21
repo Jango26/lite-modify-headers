@@ -103,7 +103,7 @@ export function newId(): string {
 
 export function createEmptyRule(): Rule {
     return {
-        status: 'on',
+        status: 'off',
         name: '',
         apply_on: 'req',
         action: 'set',
@@ -118,11 +118,11 @@ export function createEmptyRuleItem(): RuleItem {
 }
 
 export function createEmptyGroupHeader(): GroupHeader {
-    return {id: newId(), status: 'on', apply_on: 'req', action: 'set', header_name: '', header_value: ''};
+    return {id: newId(), status: 'off', apply_on: 'req', action: 'set', header_name: '', header_value: ''};
 }
 
 export function createEmptyGroup(): GroupItem {
-    return {kind: 'group', id: newId(), status: 'on', name: '', url_filter: '', headers: [createEmptyGroupHeader()]};
+    return {kind: 'group', id: newId(), status: 'off', name: '', url_filter: '', headers: [createEmptyGroupHeader()]};
 }
 
 /*
