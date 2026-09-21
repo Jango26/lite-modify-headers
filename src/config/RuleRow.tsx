@@ -40,7 +40,7 @@ export function RuleRow({
 }: RuleRowProps) {
     return (
         <div className="flex items-center gap-2.5 px-[18px] py-3.5">
-            <Cell className="w-[70px] flex-none justify-center">
+            <Cell className="w-[42px] flex-none justify-center">
                 <input
                     type="checkbox"
                     title="Activate / deactivate rule"

@@ -107,9 +107,6 @@ function StatusLine({started, items}: {started: boolean; items: ConfigItem[]}) {
                 <span className={`size-2 flex-none rounded-full ${started ? 'bg-running' : 'bg-paused-ink'}`} />
                 <span className={started ? 'text-running' : 'text-paused-ink'}>{label}</span>
             </span>
-            <span>
-                {activeCount} / {rules.length} rules
-            </span>
         </div>
     );
 }
