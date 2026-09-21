@@ -18,6 +18,7 @@ const TYPE_LABELS: [RuleTarget, string][] = [
 
 interface RuleRowProps {
     rule: Rule;
+    started: boolean;
     onChange: (changes: Partial<Rule>) => void;
     onCopy: () => void;
     onRemove: () => void;
@@ -32,6 +33,7 @@ interface RuleRowProps {
  */
 export function RuleRow({
     rule,
+    started,
     onChange,
     onCopy,
     onRemove,
@@ -46,7 +48,7 @@ export function RuleRow({
                     title="Activate / deactivate rule"
                     checked={rule.status === 'on'}
                     onChange={(event) => onChange({status: event.target.checked ? 'on' : 'off'})}
-                    className="relative m-0 h-[22px] w-[42px] flex-none cursor-pointer appearance-none rounded-full bg-border shadow-[inset_0_0_0_1px_var(--color-fainter)] transition-colors after:absolute after:top-0.5 after:left-0.5 after:size-[18px] after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-accent checked:shadow-none checked:after:translate-x-5"
+                    className={`relative m-0 h-[22px] w-[42px] flex-none cursor-pointer appearance-none rounded-full bg-border shadow-[inset_0_0_0_1px_var(--color-fainter)] transition-colors after:absolute after:top-0.5 after:left-0.5 after:size-[18px] after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-accent checked:shadow-none checked:after:translate-x-5 ${started ? '' : 'checked:bg-accent/40'}`}
                 />
             </Cell>
             <Cell className="w-[180px] flex-none">

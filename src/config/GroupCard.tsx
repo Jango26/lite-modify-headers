@@ -27,6 +27,7 @@ const TYPE_LABELS: [RuleTarget, string][] = [
 
 interface GroupCardProps {
     group: GroupItem;
+    started: boolean;
     onChange: (changes: Partial<Omit<GroupItem, 'kind' | 'headers'>>) => void;
     onHeaderChange: (headerIndex: number, changes: Partial<GroupHeader>) => void;
     onHeaderMove: (from: number, to: number) => void;
@@ -50,6 +51,7 @@ interface GroupCardProps {
  */
 export function GroupCard({
     group,
+    started,
     onChange,
     onHeaderChange,
     onHeaderMove,
@@ -86,7 +88,7 @@ export function GroupCard({
                     title="Activate / deactivate the whole group"
                     checked={group.status === 'on'}
                     onChange={(event) => onChange({status: event.target.checked ? 'on' : 'off'})}
-                    className="relative m-0 h-[22px] w-[42px] flex-none cursor-pointer appearance-none rounded-full bg-border shadow-[inset_0_0_0_1px_var(--color-fainter)] transition-colors after:absolute after:top-0.5 after:left-0.5 after:size-[18px] after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-accent checked:shadow-none checked:after:translate-x-5"
+                    className={`relative m-0 h-[22px] w-[42px] flex-none cursor-pointer appearance-none rounded-full bg-border shadow-[inset_0_0_0_1px_var(--color-fainter)] transition-colors after:absolute after:top-0.5 after:left-0.5 after:size-[18px] after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-accent checked:shadow-none checked:after:translate-x-5 ${started ? '' : 'checked:bg-accent/40'}`}
                 />
                 <span className="flex-none rounded bg-accent-soft px-2 py-1 font-mono text-[11px] font-semibold text-accent-ink">
                     GROUP
@@ -122,6 +124,7 @@ export function GroupCard({
                                 key={header.id}
                                 header={header}
                                 groupActive={group.status === 'on'}
+                                started={started}
                                 onChange={(changes) => onHeaderChange(headerIndex, changes)}
                                 onCopy={() => onCopyHeader(headerIndex)}
                                 onRemove={() => onRemoveHeader(headerIndex)}
@@ -145,6 +148,7 @@ export function GroupCard({
 interface HeaderRowProps {
     header: GroupHeader;
     groupActive: boolean;
+    started: boolean;
     onChange: (changes: Partial<GroupHeader>) => void;
     onCopy: () => void;
     onRemove: () => void;
@@ -153,12 +157,13 @@ interface HeaderRowProps {
 }
 
 /*
- * A header row's green only shows when the group itself is active : if the
- * group is off, a switched-on header is not really in effect, so the row
- * background stays neutral and the toggle dims to a faint green instead.
+ * A header row's green only shows when the group is active AND the global
+ * switch is on : if either is off, a switched-on header is not really in
+ * effect, so the row background stays neutral and the toggle dims to a faint
+ * green instead.
  */
-function HeaderRow({header, groupActive, onChange, onCopy, onRemove, flash, onFlashEnd}: HeaderRowProps) {
-    const active = groupActive && header.status === 'on';
+function HeaderRow({header, groupActive, started, onChange, onCopy, onRemove, flash, onFlashEnd}: HeaderRowProps) {
+    const active = groupActive && started && header.status === 'on';
     const {setNodeRef, attributes, listeners, transform, transition, isDragging} = useSortable({id: header.id});
     const style = {
         transform: CSS.Transform.toString(transform ? {x: transform.x, y: transform.y, scaleX: 1, scaleY: 1} : null),
@@ -175,7 +180,7 @@ function HeaderRow({header, groupActive, onChange, onCopy, onRemove, flash, onFl
                 title="Activate / deactivate header"
                 checked={header.status === 'on'}
                 onChange={(event) => onChange({status: event.target.checked ? 'on' : 'off'})}
-                className={`relative m-0 h-[22px] w-[42px] flex-none cursor-pointer appearance-none rounded-full bg-border shadow-[inset_0_0_0_1px_var(--color-fainter)] transition-colors after:absolute after:top-0.5 after:left-0.5 after:size-[18px] after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-accent checked:shadow-none checked:after:translate-x-5 ${groupActive ? '' : 'checked:bg-accent/40'}`}
+                className={`relative m-0 h-[22px] w-[42px] flex-none cursor-pointer appearance-none rounded-full bg-border shadow-[inset_0_0_0_1px_var(--color-fainter)] transition-colors after:absolute after:top-0.5 after:left-0.5 after:size-[18px] after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-accent checked:shadow-none checked:after:translate-x-5 ${groupActive && started ? '' : 'checked:bg-accent/40'}`}
             />
             <Select
                 options={TYPE_LABELS}

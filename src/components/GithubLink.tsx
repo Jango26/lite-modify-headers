@@ -3,6 +3,10 @@ export const REPO_URL = 'https://github.com/Jango26/lite-modify-headers';
 /**
  * Opens the repository in a new tab. Rendered as an anchor rather than a button
  * so middle-click and context-menu still behave like a normal link.
+ *
+ * The GitHub mark is kept as a hand-drawn path : lucide-react v1.x ships no
+ * brand icon for it, and a generic substitute (Code, ExternalLink) would lose
+ * the brand recognition a GitHub link is meant to carry.
  */
 export function GithubLink({size = 18}: {size?: number}) {
     return (

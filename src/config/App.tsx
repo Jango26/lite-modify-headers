@@ -50,7 +50,7 @@ export function App() {
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
                     <SortableContext items={config.items.map((item) => item.id)} strategy={verticalListSortingStrategy}>
                         {config.items.map((item, index) => (
-                            <ItemRow key={item.id} item={item} index={index} edit={edit} />
+                            <ItemRow key={item.id} item={item} index={index} started={started} edit={edit} />
                         ))}
                     </SortableContext>
                 </DndContext>
@@ -98,6 +98,7 @@ type EditHandlers = Omit<
 interface ItemRowProps {
     item: ConfigItem;
     index: number;
+    started: boolean;
     edit: EditHandlers;
 }
 
@@ -105,7 +106,7 @@ interface ItemRowProps {
  * ItemRow owns the sortable wrapper div so the dnd-kit transform applies at
  * the row level for both rules and groups.
  */
-function ItemRow({item, index, edit}: ItemRowProps) {
+function ItemRow({item, index, started, edit}: ItemRowProps) {
     const onCopy = () => edit.duplicateItem(index);
     const onRemove = () => edit.removeItem(index);
     const flash = edit.flashed === item.id;
@@ -127,6 +128,7 @@ function ItemRow({item, index, edit}: ItemRowProps) {
             <div ref={setNodeRef} style={style} className={isDragging ? 'opacity-50' : ''}>
                 <GroupCard
                     group={item}
+                    started={started}
                     onChange={(changes) => edit.updateGroup(index, changes)}
                     onHeaderChange={(headerIndex, changes) => edit.updateHeader(index, headerIndex, changes)}
                     onHeaderMove={(from, to) => edit.moveHeader(index, from, to)}
@@ -152,6 +154,7 @@ function ItemRow({item, index, edit}: ItemRowProps) {
             onAnimationEnd={onFlashEnd}>
             <RuleRow
                 rule={item}
+                started={started}
                 onChange={(changes) => edit.updateRule(index, changes)}
                 onCopy={onCopy}
                 onRemove={onRemove}

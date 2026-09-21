@@ -63,7 +63,12 @@ export function Menu() {
 
             <ul className="m-0 list-none p-0">
                 {config.items.map((item, index) => (
-                    <ItemLine key={index} item={item} onToggle={() => toggleItem(index)} />
+                    <ItemLine
+                        key={index}
+                        item={item}
+                        started={started}
+                        onToggle={() => toggleItem(index)}
+                    />
                 ))}
             </ul>
 
@@ -133,10 +138,15 @@ function itemTag(item: ConfigItem): string {
     return item.apply_on === 'res' ? 'RES' : 'REQ';
 }
 
-function ItemLine({item, onToggle}: {item: ConfigItem; onToggle: () => void}) {
+function ItemLine({item, started, onToggle}: {item: ConfigItem; started: boolean; onToggle: () => void}) {
     return (
         <li className="flex items-center gap-3 border-b border-border px-4 py-3 last:border-b-0">
-            <Toggle checked={item.status === 'on'} title="Activate / deactivate" onChange={onToggle} />
+            <Toggle
+                checked={item.status === 'on'}
+                dim={item.status === 'on' && !started}
+                title="Activate / deactivate"
+                onChange={onToggle}
+            />
             <span className="min-w-0 flex-1">
                 <span className="block truncate font-mono text-[13px] font-bold text-ink">{itemLabel(item)}</span>
                 <span className="mt-0.5 block truncate text-xs text-muted">{itemDetail(item)}</span>
@@ -148,15 +158,19 @@ function ItemLine({item, onToggle}: {item: ConfigItem; onToggle: () => void}) {
     );
 }
 
-/* Activates a single item. The start/stop switch is StartStopSwitch. */
-function Toggle({checked, title, onChange}: {checked: boolean; title: string; onChange: () => void}) {
+/*
+ * Activates a single item. The start/stop switch is StartStopSwitch. When the
+ * global switch is off, a checked item is not actually in effect, so its track
+ * dims to a faint green the way the config page's rows do.
+ */
+function Toggle({checked, dim, title, onChange}: {checked: boolean; dim: boolean; title: string; onChange: () => void}) {
     return (
         <input
             type="checkbox"
             title={title}
             checked={checked}
             onChange={onChange}
-            className="relative m-0 h-[22px] w-[42px] flex-none cursor-pointer appearance-none rounded-full bg-border shadow-[inset_0_0_0_1px_var(--color-fainter)] transition-colors after:absolute after:top-0.5 after:left-0.5 after:size-[18px] after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-accent checked:shadow-none checked:after:translate-x-5"
+            className={`relative m-0 h-[22px] w-[42px] flex-none cursor-pointer appearance-none rounded-full bg-border shadow-[inset_0_0_0_1px_var(--color-fainter)] transition-colors after:absolute after:top-0.5 after:left-0.5 after:size-[18px] after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-accent checked:shadow-none checked:after:translate-x-5 ${dim ? 'checked:bg-accent/40' : ''}`}
         />
     );
 }
