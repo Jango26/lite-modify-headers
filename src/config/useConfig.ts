@@ -157,7 +157,7 @@ export function useConfig() {
         (index: number, headerIndex: number) => {
             const target = config.items[index] as GroupItem;
             const headers = [...target.headers];
-            const copy = {...headers[headerIndex], id: newId()};
+            const copy = {...headers[headerIndex], id: newId(), status: 'off' as const};
             headers.splice(headerIndex + 1, 0, copy);
             setFlashed(copy.id);
             return withHeaders(index, headers);
@@ -199,15 +199,21 @@ export function useConfig() {
     /*
      * The copy lands right below its source so it keeps a neighbouring
      * priority. Every clone gets a fresh id : reusing the source id would make
-     * React treat the two lines as the same one.
+     * React treat the two lines as the same one. The status is reset to off
+     * so a duplicate never silently goes live next to its still-active source.
      */
     const duplicateItem = useCallback(
         (index: number) => {
             const source = config.items[index];
             const copy: ConfigItem =
                 source.kind === 'group'
-                    ? {...source, id: newId(), headers: source.headers.map((header) => ({...header, id: newId()}))}
-                    : {...source, id: newId()};
+                    ? {
+                          ...source,
+                          id: newId(),
+                          status: 'off',
+                          headers: source.headers.map((header) => ({...header, id: newId(), status: 'off'}))
+                      }
+                    : {...source, id: newId(), status: 'off'};
             const items = [...config.items];
             items.splice(index + 1, 0, copy);
             setFlashed(copy.id);
