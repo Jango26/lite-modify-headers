@@ -22,7 +22,7 @@ export function StartStopSwitch({started, onToggle}: {started: boolean; onToggle
                 title="Start / stop applying rules"
                 checked={started}
                 onChange={onToggle}
-                className="relative m-0 h-[26px] w-[48px] flex-none cursor-pointer appearance-none rounded-full bg-border shadow-[inset_0_0_0_1px_var(--color-fainter)] transition-colors after:absolute after:top-0.5 after:left-0.5 after:size-[22px] after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-running checked:shadow-none checked:after:translate-x-[22px]"
+                className="relative m-0 h-[26px] w-[48px] flex-none cursor-pointer appearance-none rounded-full bg-paused-soft shadow-[inset_0_0_0_1px_var(--color-fainter)] transition-colors after:absolute after:top-0.5 after:left-0.5 after:size-[22px] after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-running checked:shadow-none checked:after:translate-x-[22px]"
             />
         </label>
     );
