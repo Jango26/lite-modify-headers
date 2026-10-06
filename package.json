@@ -1,6 +1,6 @@
 {
     "name": "lite-modify-headers",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "private": true,
     "type": "module",
     "scripts": {
@@ -11,7 +11,9 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "format": "prettier --write .",
-        "icons": "node scripts/make-icons.mjs"
+        "icons": "node scripts/make-icons.mjs",
+        "screenshot:chrome": "open -na \"Google Chrome\" --args --user-data-dir=/tmp/chrome-1280x800 --window-size=1280,800 --window-position=100,100",
+        "resize:market": "node scripts/resize/resize-images.mjs screenshot 1280x800"
     },
     "dependencies": {
         "@dnd-kit/core": "^6.3.1",

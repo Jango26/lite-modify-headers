@@ -4,14 +4,14 @@
 
 ## 用法
 
-把某个目录下的图片统一缩放到指定尺寸，输出到该目录的**平级目录 `resize-output/`**。
+把某个目录下的图片统一缩放到指定尺寸，输出到该目录下的 **`resize/`** 子目录。
 
 ```bash
 node scripts/resize/resize-images.mjs <目录> <宽>x<高>
 
 # 例：把 ~/Desktop/shots 里的图都做成 1280x800
 node scripts/resize/resize-images.mjs ~/Desktop/shots 1280x800
-# 产物在 ~/Desktop/resize-output/，文件名不变
+# 产物在 ~/Desktop/shots/resize/，文件名不变
 ```
 
 ## 尺寸不匹配时怎么裁
@@ -28,7 +28,7 @@ node scripts/resize/resize-images.mjs ~/Desktop/shots 1280x800
 - 识别的后缀：`.png` `.jpg` `.jpeg` `.webp` `.tif` `.tiff` `.gif` `.bmp`，目录里的其它文件直接忽略，不递归子目录。
 - 输出编码：`.jpg`/`.jpeg` 写 JPEG（质量 0.92），**其余一律写 PNG**——注意 `.webp`/`.gif` 进去，出来的文件后缀不变但内容是 PNG。
 - 单张失败（文件损坏等）只打印一行 `skipped xxx`，不中断整批；最后汇总 `3/4 images written to ...`。
-- `resize-output/` 已存在时不会清空，同名文件覆盖。
+- `resize/` 已存在时不会清空，同名文件覆盖。
 
 ## 只能在 macOS 跑
 
@@ -38,7 +38,7 @@ node scripts/resize/resize-images.mjs ~/Desktop/shots 1280x800
 
 ## 文件
 
-- **`resize-images.mjs`** — 入口：解析参数、遍历目录、建 `resize-output/`、汇总结果。
+- **`resize-images.mjs`** — 入口：解析参数、遍历目录、建 `resize/`、汇总结果。
 - **`resize-one.js`** — 单张图片的缩放 + 裁切（JXA），给上面那个调用，一般不用手动跑：
 
     ```bash

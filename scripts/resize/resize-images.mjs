@@ -3,8 +3,8 @@
  *
  *   node scripts/resize/resize-images.mjs <dir> <width>x<height>
  *
- * The output lands in `resize-output/`, a sibling of <dir>, under the same
- * filenames. Source images whose ratio does not match the target are scaled to
+ * The output lands in `<dir>/resize/`, under the same filenames. Source images
+ * whose ratio does not match the target are scaled to
  * cover the box and then cropped from the top-left corner, so the overflow is
  * always taken off the bottom (too tall) or the right edge (too wide).
  *
@@ -63,7 +63,7 @@ function reason(error) {
 }
 
 const {dir, width, height} = parseArgs(process.argv.slice(2));
-const outDir = join(dirname(dir), 'resize-output');
+const outDir = join(dir, 'resize');
 const images = listImages(dir);
 
 mkdirSync(outDir, {recursive: true});
