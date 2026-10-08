@@ -2,7 +2,7 @@
     "description": "Rewrite HTTP request and response headers from a local rules table",
     "manifest_version": 3,
     "name": "Lite Modify Headers",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "homepage_url": "https://chromewebstore.google.com/detail/lite-modify-headers/pbpaackkagkoodedjecjfgpceccoaoja",
     "icons": {
         "16": "icons/m-16.png",
