@@ -25,9 +25,7 @@ Fill in a row, flip the switch, done. No account, no server, no telemetry — yo
 
 ### From the Chrome Web Store (recommended)
 
-<!-- TODO: replace with the Chrome Web Store listing URL -->
-
-**[Install from the Chrome Web Store](#)** — automatic updates, and no developer mode needed.
+**[Install from the Chrome Web Store](https://chromewebstore.google.com/detail/lite-modify-headers/pbpaackkagkoodedjecjfgpceccoaoja)** — automatic updates, and no developer mode needed.
 
 ### From source (local build)
 

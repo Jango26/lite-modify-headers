@@ -25,9 +25,7 @@
 
 ### 从 Chrome 应用商店安装（推荐）
 
-<!-- TODO: 替换为 Chrome 应用商店的地址 -->
-
-**[前往 Chrome 应用商店安装](#)** —— 自动更新，也不需要开发者模式。
+**[前往 Chrome 应用商店安装](https://chromewebstore.google.com/detail/lite-modify-headers/pbpaackkagkoodedjecjfgpceccoaoja)** —— 自动更新，也不需要开发者模式。
 
 ### 从源码本地安装
 
