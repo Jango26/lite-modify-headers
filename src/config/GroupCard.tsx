@@ -163,7 +163,8 @@ interface HeaderRowProps {
  * green instead.
  */
 function HeaderRow({header, groupActive, started, onChange, onCopy, onRemove, flash, onFlashEnd}: HeaderRowProps) {
-    const active = groupActive && started && header.status === 'on';
+    const active = groupActive && header.status === 'on';
+    const inactiveHeader = groupActive && header.status === 'off';
     const {setNodeRef, attributes, listeners, transform, transition, isDragging} = useSortable({id: header.id});
     const style = {
         transform: CSS.Transform.toString(transform ? {x: transform.x, y: transform.y, scaleX: 1, scaleY: 1} : null),
@@ -173,11 +174,15 @@ function HeaderRow({header, groupActive, started, onChange, onCopy, onRemove, fl
         <div
             ref={setNodeRef}
             style={style}
-            className={`flex items-center gap-2.5 rounded-md px-2 py-1.5 ${active ? 'bg-active' : 'bg-card'} ${flash ? 'flash-new' : ''} ${isDragging ? 'opacity-50' : ''}`}
+            className={`flex items-center gap-2.5 rounded-md px-2 py-1.5 ${active ? 'bg-active' : inactiveHeader ? 'bg-surface-hover' : 'bg-card'} ${flash ? 'flash-new' : ''} ${isDragging ? 'opacity-50' : ''}`}
             onAnimationEnd={onFlashEnd}>
             <input
                 type="checkbox"
                 title="Activate / deactivate header"
+                aria-label={`${header.header_name || 'Header'} ${header.status === 'on' ? 'enabled' : 'disabled'}`}
+                aria-checked={header.status === 'on'}
+                role="switch"
+                data-state={header.status}
                 checked={header.status === 'on'}
                 onChange={(event) => onChange({status: event.target.checked ? 'on' : 'off'})}
                 className={`relative m-0 h-[22px] w-[42px] flex-none cursor-pointer appearance-none rounded-full bg-border shadow-[inset_0_0_0_1px_var(--color-fainter)] transition-colors after:absolute after:top-0.5 after:left-0.5 after:size-[18px] after:rounded-full after:bg-white after:shadow-[0_1px_2px_rgba(0,0,0,0.2)] after:transition-transform after:content-[''] checked:bg-accent checked:shadow-none checked:after:translate-x-5 ${groupActive && started ? '' : 'checked:bg-accent/40'}`}
