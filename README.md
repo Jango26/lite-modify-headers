@@ -10,7 +10,13 @@ Rewrite HTTP **request** and **response** headers in Chrome — from one table, 
 
 Fill in a row, flip the switch, done. No account, no server, no telemetry — your rules stay in the browser.
 
-![Configuration page](./docs/images/options-overview.png)
+### Screenshots
+
+The configuration page in light and dark themes. Click either screenshot to view it full size.
+
+| Light theme | Dark theme |
+| :---: | :---: |
+| [![Configuration page in light theme](./screenshot/light-02.png)](./screenshot/light-02.png) | [![Configuration page in dark theme](./screenshot/dark-02.png)](./screenshot/dark-02.png) |
 
 ## Why it's easy
 
