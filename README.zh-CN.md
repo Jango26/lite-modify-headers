@@ -10,7 +10,13 @@
 
 填一行、打开开关，就完事了。无需账号，没有服务端，不上报任何数据 —— 规则只存在你的浏览器里。
 
-![配置页](./docs/images/options-overview.png)
+### 界面截图
+
+配置页的浅色与深色主题。点击任意截图可查看原图。
+
+| 浅色主题 | 深色主题 |
+| :---: | :---: |
+| [![浅色主题配置页](./screenshot/light-02.png)](./screenshot/light-02.png) | [![深色主题配置页](./screenshot/dark-02.png)](./screenshot/dark-02.png) |
 
 ## 为什么好用
 
